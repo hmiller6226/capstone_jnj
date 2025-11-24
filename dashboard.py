@@ -7,12 +7,29 @@ import plotly.graph_objs as go
 # CONFIG
 # ==============================
 CSV_PATH = "kde_scores.csv"
-RISK_SCORE_COL = "risk_score"
+RISK_SCORE_COL = "risk_score"        # KDE risk score
+HAZARD_RISK_COL = "hazard_risk_score"  # hazard-model risk (from hazard_outputs.csv)
 
 # ==============================
 # LOAD DATA
 # ==============================
 df = pd.read_csv(CSV_PATH, low_memory=False)
+
+# ---- Merge hazard model outputs (survival additions) ----
+# hazard_outputs.csv must contain at least:
+# cve_id, risk_score (hazard risk), predicted_day_to_kev_fixed, predicted_day_to_kev_quantile
+try:
+    hazard_df = pd.read_csv("hazard_outputs.csv", low_memory=False)
+
+    # rename risk_score so we don't overwrite KDE risk_score
+    hazard_df = hazard_df.rename(columns={
+        "risk_score": HAZARD_RISK_COL
+    })
+
+    df = df.merge(hazard_df, on="cve_id", how="left")
+    print("Merged hazard_outputs.csv into main dataframe.")
+except FileNotFoundError:
+    print("hazard_outputs.csv not found — survival plot & columns will be empty.")
 
 # ---- Basic typing / cleanup ----
 if "cve_year" in df.columns:
@@ -32,6 +49,13 @@ if RISK_SCORE_COL in df.columns:
     df[RISK_SCORE_COL] = pd.to_numeric(df[RISK_SCORE_COL], errors="coerce")
 else:
     df[RISK_SCORE_COL] = df["base_score"]
+
+# hazard risk & prediction columns from survival model
+if HAZARD_RISK_COL in df.columns:
+    df[HAZARD_RISK_COL] = pd.to_numeric(df[HAZARD_RISK_COL], errors="coerce")
+for col in ["predicted_day_to_kev_fixed", "predicted_day_to_kev_quantile"]:
+    if col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
 
 df["is_high_risk"] = df["base_score"] >= 7.0
 
@@ -110,7 +134,11 @@ app.layout = html.Div(
                             max=year_max,
                             step=1,
                             value=[year_min, year_max],
-                            marks={y: str(y) for y in range(year_min, year_max + 1, max(1, (year_max - year_min) // 6 or 1))},
+                            marks={y: str(y) for y in range(
+                                year_min,
+                                year_max + 1,
+                                max(1, (year_max - year_min) // 6 or 1)
+                            )},
                             allowCross=False,
                         ),
                     ],
@@ -164,7 +192,7 @@ app.layout = html.Div(
 
         html.Hr(),
 
-        # MAIN CHARTS (ADDED ATTACK VECTOR CHART)
+        # MAIN CHARTS + SURVIVAL
         html.Div(
             style={
                 "display": "grid",
@@ -176,13 +204,14 @@ app.layout = html.Div(
                 dcc.Graph(id="registration-lag-chart"),
                 dcc.Graph(id="risk-correlation-chart"),
                 dcc.Graph(id="kev-leadtime-chart"),
-                dcc.Graph(id="attackvector-chart"),  # NEW CHART
+                dcc.Graph(id="attackvector-chart"),
+                dcc.Graph(id="hazard-scatter-chart"),  # NEW survival plot
             ],
         ),
 
         html.Hr(),
 
-        # TOP 5 TABLE
+        # TOP 5 TABLE (now includes survival metrics)
         html.Div(
             style={"display": "flex", "flexDirection": "column", "gap": "10px"},
             children=[
@@ -207,11 +236,14 @@ app.layout = html.Div(
                     id="top-risk-table",
                     columns=[
                         {"name": "CVE ID", "id": "cve_id"},
-                        {"name": "Risk Score", "id": RISK_SCORE_COL},
+                        {"name": "Risk Score (KDE)", "id": RISK_SCORE_COL},
+                        {"name": "Hazard Risk Score", "id": HAZARD_RISK_COL},
+                        {"name": "Predicted Days to KEV (Fixed)", "id": "predicted_day_to_kev_fixed"},
+                        {"name": "Predicted Days to KEV (Quantile)", "id": "predicted_day_to_kev_quantile"},
                         {"name": "Base Score", "id": "base_score"},
                         {"name": "Severity", "id": "severity"},
                         {"name": "Is KEV", "id": "is_kev"},
-                        {"name": "Days to KEV", "id": "days_to_kev"},
+                        {"name": "Days to KEV (Observed)", "id": "days_to_kev"},
                     ],
                     page_size=10,
                     sort_action="native",
@@ -248,6 +280,108 @@ def filter_df(df_in, year_range, severities, kev_mode):
 
 
 # ==============================
+# HAZARD / SURVIVAL FIGURE
+# ==============================
+def make_hazard_figure(dff):
+    """
+    Predicted Days to KEV vs Hazard Model Risk — Critical Non-KEVs,
+    with 50/75/90% vertical lines and shaded high-risk region (>90th percentile).
+    """
+    if HAZARD_RISK_COL not in dff.columns or "predicted_day_to_kev_fixed" not in dff.columns:
+        fig = go.Figure().add_annotation(
+            text=f"Need '{HAZARD_RISK_COL}' and 'predicted_day_to_kev_fixed' columns",
+            x=0.5, y=0.5, showarrow=False,
+        )
+        return fig
+
+    hazard_df = dff.copy()
+
+    # critical non-KEVs only (if columns exist)
+    if "severity" in hazard_df.columns:
+        hazard_df = hazard_df[hazard_df["severity"] == "CRITICAL"]
+    if "is_kev" in hazard_df.columns:
+        hazard_df = hazard_df[hazard_df["is_kev"] == 0]
+
+    hazard_df = hazard_df.dropna(subset=[HAZARD_RISK_COL, "predicted_day_to_kev_fixed"])
+
+    if hazard_df.empty:
+        fig = go.Figure().add_annotation(
+            text="No data for Hazard Model plot under current filters",
+            x=0.5, y=0.5, showarrow=False,
+        )
+        return fig
+
+    # hover info
+    hover_cols = [
+        c for c in [
+            "cve_id",
+            HAZARD_RISK_COL,
+            "predicted_day_to_kev_fixed",
+            "predicted_day_to_kev_quantile",
+        ]
+        if c in hazard_df.columns
+    ]
+
+    fig = px.scatter(
+        hazard_df,
+        x=HAZARD_RISK_COL,
+        y="predicted_day_to_kev_fixed",
+        color=HAZARD_RISK_COL,
+        color_continuous_scale="Reds",
+        hover_data=hover_cols,
+        labels={
+            HAZARD_RISK_COL: "Hazard Model Risk Score",
+            "predicted_day_to_kev_fixed": "Predicted Days to KEV (Fixed Threshold)",
+        },
+        title="Predicted Days to KEV vs Hazard Model Risk — Critical Non-KEVs",
+    )
+
+    # quantile lines and shaded regions
+    x_min = hazard_df[HAZARD_RISK_COL].min()
+    x_max = hazard_df[HAZARD_RISK_COL].max()
+    span = x_max - x_min if x_max > x_min else 1.0
+
+    q50 = hazard_df[HAZARD_RISK_COL].quantile(0.5)
+    q75 = hazard_df[HAZARD_RISK_COL].quantile(0.75)
+    q90 = hazard_df[HAZARD_RISK_COL].quantile(0.9)
+
+    for q, label in [(q50, "50%"), (q75, "75%"), (q90, "90%")]:
+        fig.add_vline(
+            x=q,
+            line=dict(color="gray", dash="dash"),
+            annotation_text=label,
+            annotation_position="top",
+        )
+
+    # low–medium region
+    fig.add_vrect(
+        x0=x_min,
+        x1=q90,
+        fillcolor="lightblue",
+        opacity=0.08,
+        layer="below",
+        line_width=0,
+    )
+
+    # high-risk region (>90th percentile)
+    fig.add_vrect(
+        x0=q90,
+        x1=x_max,
+        fillcolor="yellow",
+        opacity=0.2,
+        layer="below",
+        line_width=0,
+        annotation_text="High hazard-risk region (>90th percentile)",
+        annotation_position="top left",
+    )
+
+    fig.update_xaxes(range=[x_min - 0.05 * span, x_max + 0.05 * span])
+    fig.update_layout(coloraxis_colorbar=dict(title="Hazard Risk"))
+
+    return fig
+
+
+# ==============================
 # CALLBACK — MAIN CHARTS
 # ==============================
 @app.callback(
@@ -256,6 +390,7 @@ def filter_df(df_in, year_range, severities, kev_mode):
     Output("risk-correlation-chart", "figure"),
     Output("kev-leadtime-chart", "figure"),
     Output("attackvector-chart", "figure"),
+    Output("hazard-scatter-chart", "figure"),
     Input("year-slider", "value"),
     Input("severity-dropdown", "value"),
     Input("kev-filter", "value"),
@@ -310,7 +445,7 @@ def update_charts(year_range, severities, kev_mode, score_pair):
     else:
         fig_lead = go.Figure().add_annotation(text="No KEV lead-time data", x=0.5, y=0.5, showarrow=False)
 
-    # ---------- 5) Attack Vector Distribution (NEW) ----------
+    # ---------- 5) Attack Vector Distribution ----------
     if "cvss_attackvector" in dff.columns:
         av_df = dff["cvss_attackvector"].value_counts().reset_index()
         av_df.columns = ["Attack Vector", "Count"]
@@ -327,7 +462,10 @@ def update_charts(year_range, severities, kev_mode, score_pair):
             text="cvss_attackvector column missing", x=0.5, y=0.5, showarrow=False
         )
 
-    return fig_cross, fig_lag, fig_corr, fig_lead, fig_attack
+    # ---------- 6) Hazard / Survival Plot ----------
+    fig_hazard = make_hazard_figure(dff)
+
+    return fig_cross, fig_lag, fig_corr, fig_lead, fig_attack, fig_hazard
 
 
 # ==============================
@@ -345,12 +483,22 @@ def update_top_risk_table(search_value, year_range, severities, kev_mode):
     dff = dff.dropna(subset=[RISK_SCORE_COL])
 
     if search_value:
-        dff = dff[dff["cve_id"].str.contains(str(search_value), case=False, na=False)]
+        dff = dff[dff["cve_id"].astype(str).str.contains(str(search_value), case=False, na=False)]
 
     dff = dff.sort_values(RISK_SCORE_COL, ascending=False)
     dff = dff.head(5 if not search_value else 20)
 
-    keep_cols = ["cve_id", RISK_SCORE_COL, "base_score", "severity", "is_kev", "days_to_kev"]
+    keep_cols = [
+        "cve_id",
+        RISK_SCORE_COL,
+        HAZARD_RISK_COL,
+        "predicted_day_to_kev_fixed",
+        "predicted_day_to_kev_quantile",
+        "base_score",
+        "severity",
+        "is_kev",
+        "days_to_kev",
+    ]
     keep_cols = [c for c in keep_cols if c in dff.columns]
 
     return dff[keep_cols].to_dict("records")

@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+"""
+Daily vulnerability pipeline:
+- Pulls data from NVD/KEV/JVN/EUVD
+- Cleans and merges into a unified master via `merge_clean.consolidate()`
+- Optionally uploads the merged table to Postgres
+- Schedules the above to run daily
+
+Usage examples:
+  python pipeline.py --run-once
+  python pipeline.py --time 06:30
+  python pipeline.py --init-nvd --start-year 2002
+  python pipeline.py --from-year 2024 --upload --upload-schema vuln --upload-table combined_master
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -27,6 +41,7 @@ try:
     from dotenv import load_dotenv
     load_dotenv()
 except Exception:
+    # .env is optional; safe to continue without it
     pass
 
 import io
@@ -100,6 +115,7 @@ EUVD_PAGE_DELAY = 0.3
 # =============================================================================
 
 def setup_logging() -> None:
+    """Configure file + console logging."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
         filename=str(LOG_FILE),
@@ -112,7 +128,18 @@ def setup_logging() -> None:
     logging.getLogger("").addHandler(sh)
 
 def try_step(label: str, fn, *args, **kwargs):
-    """Run a step; on any exception, log and continue."""
+    """
+    Run a step and catch all exceptions.
+
+    Parameters
+    ----------
+    label : str
+        Human-friendly step name for logging.
+    fn : callable
+        Function to execute.
+    *args, **kwargs :
+        Arguments forwarded to the function.
+    """
     try:
         fn(*args, **kwargs)
     except Exception as e:
@@ -123,6 +150,14 @@ def try_step(label: str, fn, *args, **kwargs):
 # =============================================================================
 
 def make_session() -> requests.Session:
+    """
+    Create a configured requests Session with retry/backoff.
+
+    Returns
+    -------
+    requests.Session
+        Session with retry adapters and common headers.
+    """
     s = requests.Session()
     s.headers.update({
         "User-Agent": HTTP_HEADERS.get("User-Agent", "vuln-pipeline/1.0"),
@@ -144,6 +179,22 @@ def make_session() -> requests.Session:
     return s
 
 def get_with_retry(session: requests.Session, url: str, **kwargs) -> requests.Response:
+    """
+    GET with session-level retry and sensible default timeout.
+
+    Parameters
+    ----------
+    session : requests.Session
+        Session returned from make_session().
+    url : str
+        Target URL.
+    **kwargs :
+        Requests arguments (timeout, params, headers, stream, ...)
+
+    Returns
+    -------
+    requests.Response
+    """
     if "timeout" not in kwargs:
         kwargs["timeout"] = NET_TOTAL_TIMEOUT
     return session.get(url, **kwargs)
@@ -151,6 +202,13 @@ def get_with_retry(session: requests.Session, url: str, **kwargs) -> requests.Re
 def http_get(url: str, *, timeout: int | Tuple[int, int] = NET_TOTAL_TIMEOUT,
              retries: int = NET_RETRIES, backoff: float = NET_BACKOFF,
              stream: bool = True) -> requests.Response:
+    """
+    Convenience wrapper to perform a GET with a fresh retrying Session.
+
+    Notes
+    -----
+    Use this when you don't need to reuse the Session object.
+    """
     s = make_session()
     return get_with_retry(s, url, **{"timeout": timeout, "stream": stream})
 
@@ -159,6 +217,14 @@ def http_get(url: str, *, timeout: int | Tuple[int, int] = NET_TOTAL_TIMEOUT,
 # =============================================================================
 
 def load_state() -> Dict[str, Any]:
+    """
+    Load pipeline state (last success time, per-source watermarks).
+
+    Returns
+    -------
+    dict
+        State dictionary with defaults if file is missing/corrupt.
+    """
     if STATE_PATH.exists():
         try:
             return json.loads(STATE_PATH.read_text())
@@ -172,9 +238,29 @@ def load_state() -> Dict[str, Any]:
     }
 
 def save_state(state: Dict[str, Any]) -> None:
+    """
+    Persist pipeline state to disk.
+
+    Parameters
+    ----------
+    state : dict
+        State dictionary.
+    """
     STATE_PATH.write_text(json.dumps(state, indent=2))
 
 def month_windows(start_dt: datetime, end_dt: datetime):
+    """
+    Yield (month_start, month_end) windows from start_dt to end_dt inclusive.
+
+    Parameters
+    ----------
+    start_dt, end_dt : datetime (UTC)
+
+    Yields
+    ------
+    Tuple[datetime, datetime]
+        Start/end bounds within the same month.
+    """
     cur = datetime(start_dt.year, start_dt.month, 1, tzinfo=timezone.utc)
     end_guard = datetime(end_dt.year, end_dt.month, 1, tzinfo=timezone.utc)
     while cur <= end_guard:
@@ -192,10 +278,22 @@ NVD_RECENT = "nvdcve-2.0-recent.json.zip"
 NVD_MODIFIED = "nvdcve-2.0-modified.json.zip"
 
 def nvd_years(start: int = 2002, end: Optional[int] = None) -> List[int]:
+    """
+    Build a list of NVD years from start to end (inclusive).
+
+    Returns
+    -------
+    list[int]
+    """
     end = end or datetime.utcnow().year
     return list(range(start, end + 1))
 
 def download_zip_file(url: str, dest: Path, overwrite: bool = False) -> Path:
+    """
+    Download a URL to a local zip file (atomically).
+
+    If the file exists and overwrite=False, it's skipped.
+    """
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists() and not overwrite:
         return dest
@@ -209,6 +307,10 @@ def download_zip_file(url: str, dest: Path, overwrite: bool = False) -> Path:
     return dest
 
 def unzip_json_files(src: Path, out_dir: Path, overwrite: bool = False) -> List[Path]:
+    """
+    Extract JSON files from a zip into out_dir (atomically).
+    Returns list of written/kept JSON paths.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     out: List[Path] = []
     with zipfile.ZipFile(src, "r") as zf:
@@ -226,6 +328,9 @@ def unzip_json_files(src: Path, out_dir: Path, overwrite: bool = False) -> List[
     return out
 
 def iter_cves_from_file(json_path: Path):
+    """
+    Yield CVE dicts from an NVD JSON file.
+    """
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     for w in data.get("vulnerabilities", []):
@@ -238,9 +343,15 @@ CWE_RE = re.compile(r"CWE-\d{1,5}", re.IGNORECASE)
 CPE_RE = re.compile(r"^cpe:2\.3:[aho]:([^:]+):([^:]+):([^:]*):")
 
 def to_json_compact(obj: Any) -> str:
+    """
+    Compact JSON dump with stable separators; preserves non-ASCII.
+    """
     return json.dumps(obj, ensure_ascii=False, separators=JSON_SEPARATORS)
 
 def normalize_name(name: str) -> str:
+    """
+    Normalize arbitrary strings to safe snake_case tokens (for columns).
+    """
     name = name.strip()
     name = name.replace(".", "_").replace("/", "_").replace(" ", "_")
     name = name.replace("[", "_").replace("]", "_")
@@ -249,6 +360,11 @@ def normalize_name(name: str) -> str:
     return name.lower()
 
 def flatten_to_columns(obj: Any, prefix: str = "all") -> Dict[str, Any]:
+    """
+    Flatten nested dict/list object into a flat dict of scalar columns.
+
+    Lists are serialized as compact JSON strings to keep 1-cell values.
+    """
     out: Dict[str, Any] = {}
     def walk(cur: Any, kp: str):
         if isinstance(cur, dict):
@@ -262,15 +378,24 @@ def flatten_to_columns(obj: Any, prefix: str = "all") -> Dict[str, Any]:
     return {normalize_name(k): v for k, v in out.items()}
 
 def join_values(vals) -> Optional[str]:
+    """
+    Join non-empty stringy values by ' | ' with de-duplication.
+    """
     vals = [v for v in vals if v]
     return " | ".join(sorted(set(vals))) if vals else None
 
 def desc_en(cve: dict) -> Optional[str]:
+    """
+    Extract the English description text from an NVD CVE object.
+    """
     arr = cve.get("descriptions") or cve.get("description") or []
     en = [d.get("value") for d in arr if d.get("value") and str(d.get("lang","")).lower()=="en"]
     return " ".join(en) if en else None
 
 def cvss_fields(cve: dict) -> Dict[str, Any]:
+    """
+    Pull a single CVSS block (preferring 3.1 -> 3.0 -> 2.0) into flat fields.
+    """
     out = {
         "cvss_basescore": None, "cvss_baseseverity": None, "cvss_vectorstring": None,
         "cvss_attackvector": None, "cvss_version": None,
@@ -295,6 +420,9 @@ def cvss_fields(cve: dict) -> Dict[str, Any]:
     return out
 
 def cwe_list(cve: dict) -> List[str]:
+    """
+    Extract all referenced CWE identifiers (normalized) from a CVE object.
+    """
     ids = set()
     for w in cve.get("weaknesses") or []:
         for d in (w.get("description") or w.get("descriptions") or []):
@@ -307,6 +435,13 @@ def cwe_list(cve: dict) -> List[str]:
     return sorted(ids)
 
 def cpe_vendors_products(cve: dict) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Parse configuration nodes to collect vendor and product tokens from CPEs.
+
+    Returns
+    -------
+    (vendors_str, products_str) joined by ' | ', or None if empty.
+    """
     vendors, products = set(), set()
     cfg = cve.get("configurations")
     nodes = cfg.get("nodes") if isinstance(cfg, dict) else (cfg if isinstance(cfg, list) else [])
@@ -338,10 +473,16 @@ def cpe_vendors_products(cve: dict) -> Tuple[Optional[str], Optional[str]]:
     return fmt(vendors), fmt(products)
 
 def extract_reference_urls(cve: dict) -> Optional[str]:
+    """
+    Join all reference URLs in a CVE into a single ' | '-separated string.
+    """
     urls = [r.get("url") for r in (cve.get("references") or []) if r.get("url")]
     return join_values(urls)
 
 def jsonify_sequence_cells(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert list/tuple cells in a DataFrame to compact JSON strings (row-safe).
+    """
     def is_seq(x): return isinstance(x, (list, tuple))
     out = df.copy()
     for c in out.columns:
@@ -350,6 +491,16 @@ def jsonify_sequence_cells(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 def clean_nvd_records(cves: Iterable[dict]) -> pd.DataFrame:
+    """
+    Transform raw NVD CVE dicts into a curated, flat DataFrame.
+
+    - Picks English description
+    - Parses CVSS fields
+    - Extracts vendors/products/CWEs/references
+    - Normalizes column names
+    - Coerces date columns to UTC
+    - Adds is_known_exploited flag based on CISA fields
+    """
     rows = []
     for c in cves:
         vendors, products = cpe_vendors_products(c)
@@ -385,13 +536,16 @@ def clean_nvd_records(cves: Iterable[dict]) -> pd.DataFrame:
             "cisa_required_action","cisa_vulnerability_name","is_known_exploited","raw_json"
         ])
 
+    # Normalize names and parse dates
     df.columns = [normalize_name(c) for c in df.columns]
     for col in ["published", "lastmodified", "cisa_exploit_add", "cisa_action_due"]:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors="coerce", utc=True)
 
+    # CISA presence implies "known exploited"
     df["is_known_exploited"] = df.get("cisa_exploit_add").notna() if "cisa_exploit_add" in df.columns else False
 
+    # Normalize CWE representations
     if "cwe_list" in df.columns:
         def fix(v):
             if v is None or (isinstance(v, float) and pd.isna(v)): return None
@@ -411,6 +565,14 @@ def clean_nvd_records(cves: Iterable[dict]) -> pd.DataFrame:
     return df
 
 def upsert_nvd_master(inc: pd.DataFrame) -> pd.DataFrame:
+    """
+    Merge new NVD increments into the persisted master table, dedup by id.
+
+    - Reads existing master from parquet/csv if available
+    - Aligns columns
+    - Prefers latest 'lastmodified' per id
+    - Writes updated master to parquet and csv (atomic)
+    """
     CLEAN_DIR.mkdir(parents=True, exist_ok=True)
     if NVD_MASTER_PARQUET.exists():
         master = pd.read_parquet(NVD_MASTER_PARQUET)
@@ -430,6 +592,7 @@ def upsert_nvd_master(inc: pd.DataFrame) -> pd.DataFrame:
     else:
         combined = inc.copy()
 
+    # Keep the row with the latest lastmodified per CVE id
     lm = combined.get("lastmodified")
     if lm is not None:
         lm = lm.fillna(pd.Timestamp(0, tz="UTC"))
@@ -438,6 +601,7 @@ def upsert_nvd_master(inc: pd.DataFrame) -> pd.DataFrame:
     else:
         combined = combined.drop_duplicates(subset=["id"], keep="last")
 
+    # Atomic writes
     tmp_parquet = NVD_MASTER_PARQUET.with_suffix(".parquet.tmp")
     tmp_csv = NVD_MASTER_CSV.with_suffix(".csv.tmp")
 
@@ -449,6 +613,9 @@ def upsert_nvd_master(inc: pd.DataFrame) -> pd.DataFrame:
     return combined
 
 def nvd_refresh_recent_modified() -> None:
+    """
+    Fetch NVD recent+modified feeds, clean, and upsert into master.
+    """
     logging.info("[NVD] recent + modified")
     for d in (NVD_ZIPS, NVD_JSON, CLEAN_DIR):
         d.mkdir(parents=True, exist_ok=True)
@@ -468,6 +635,9 @@ def nvd_refresh_recent_modified() -> None:
     logging.info(f"[NVD] master rows: {len(out):,}")
 
 def nvd_backfill_from(year: int) -> None:
+    """
+    Backfill NVD by year from `year` to present, updating master each year.
+    """
     logging.info(f"[NVD] backfill {year}..present")
     NVD_ZIPS.mkdir(parents=True, exist_ok=True)
     NVD_JSON.mkdir(parents=True, exist_ok=True)
@@ -496,6 +666,9 @@ def nvd_backfill_from(year: int) -> None:
 # =============================================================================
 
 def kev_pull() -> None:
+    """
+    Download the KEV CSV to data/kev (atomic write).
+    """
     KEV_DIR.mkdir(parents=True, exist_ok=True)
     logging.info("[KEV] download")
     r = http_get(KEV_URL, timeout=NET_TOTAL_TIMEOUT, retries=NET_RETRIES, backoff=NET_BACKOFF, stream=True)
@@ -512,6 +685,9 @@ def kev_pull() -> None:
 # =============================================================================
 
 def make_jvn_session() -> requests.Session:
+    """
+    Build a JVN-tuned HTTP session with slightly different headers/timeouts.
+    """
     s = requests.Session()
     s.headers.update({
         "User-Agent": "vuln-pipeline/1.0",
@@ -533,6 +709,14 @@ def make_jvn_session() -> requests.Session:
     return s
 
 def jvn_fetch_year_raw(year: int, lang: str = "ja", sleep_sec: float = 0.6) -> List[Dict[str, Any]]:
+    """
+    Fetch one calendar year's JVN HND feed with resilient per-page retry.
+
+    Returns
+    -------
+    list[dict]
+        Parsed items with title/description/ids/dates/products etc.
+    """
     session = make_jvn_session()
     start_item = 1
     page_size = 50  # JVN max
@@ -558,7 +742,7 @@ def jvn_fetch_year_raw(year: int, lang: str = "ja", sleep_sec: float = 0.6) -> L
     while True:
         params = make_params(start_item, page_size)
 
-        # retries for THIS page
+        # retries for THIS page (adjust page_size if needed)
         attempts, lowered = 0, False
         while True:
             attempts += 1
@@ -653,6 +837,9 @@ def jvn_fetch_year_raw(year: int, lang: str = "ja", sleep_sec: float = 0.6) -> L
     return records
 
 def jvn_fetch_year_df(year: int, lang: str = "ja", sleep_sec: float = 0.6) -> pd.DataFrame:
+    """
+    Convenience wrapper to fetch JVN items for one year and return a DataFrame.
+    """
     recs = jvn_fetch_year_raw(year, lang=lang, sleep_sec=sleep_sec)
     df = pd.DataFrame(recs)
     if not df.empty:
@@ -661,6 +848,9 @@ def jvn_fetch_year_df(year: int, lang: str = "ja", sleep_sec: float = 0.6) -> pd
     return df
 
 def jvn_fetch_year_range_df(start_year: int, end_year: int, lang: str = "ja", sleep_sec: float = 0.6) -> pd.DataFrame:
+    """
+    Fetch JVN for a range of years and return a unique, concatenated DataFrame.
+    """
     all_rows: List[pd.DataFrame] = []
     for yr in range(start_year, end_year + 1):
         logging.info(f"[JVN] Fetching year {yr} (HND, lang={lang})")
@@ -675,6 +865,9 @@ def jvn_fetch_year_range_df(start_year: int, end_year: int, lang: str = "ja", sl
     return df_all
 
 def jvn_incremental(state: Dict[str, Any]) -> None:
+    """
+    Incrementally fetch JVN since the last watermark and append to CSV.
+    """
     JVN_DIR.mkdir(parents=True, exist_ok=True)
     since_iso = state.get("jvn", {}).get("since_iso")
     since = datetime.fromisoformat(since_iso) if since_iso else (datetime.now(timezone.utc) - timedelta(days=7))
@@ -712,6 +905,9 @@ def jvn_incremental(state: Dict[str, Any]) -> None:
     logging.info(f"[JVN] total {len(df_all)}")
 
 def jvn_backfill_from(year: int) -> None:
+    """
+    Backfill JVN from the given year to present, maintaining a unique CSV.
+    """
     logging.info(f"[JVN] backfill {year}..present (year-based)")
     JVN_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -739,6 +935,14 @@ def jvn_backfill_from(year: int) -> None:
 # =============================================================================
 
 def euvd_fetch(start_dt: datetime, end_dt: datetime, page_size: int = 200) -> pd.DataFrame:
+    """
+    Fetch EUVD items for a date window with pagination and light backoff.
+
+    Returns
+    -------
+    pd.DataFrame
+        Unique items with parsed date columns.
+    """
     session = make_session()
     headers = {
         "User-Agent": "EUVD-bulk/1.0",
@@ -788,6 +992,9 @@ def euvd_fetch(start_dt: datetime, end_dt: datetime, page_size: int = 200) -> pd
     return df
 
 def euvd_incremental(state: Dict[str, Any]) -> None:
+    """
+    Incrementally fetch EUVD since the last watermark and append to CSV.
+    """
     EUVD_DIR.mkdir(parents=True, exist_ok=True)
     since_iso = state.get("euvd", {}).get("since_iso")
     since = datetime.fromisoformat(since_iso) if since_iso else (datetime.now(timezone.utc) - timedelta(days=7))
@@ -827,6 +1034,9 @@ def euvd_incremental(state: Dict[str, Any]) -> None:
     logging.info(f"[EUVD] total {len(df_all)}")
 
 def euvd_backfill_from(year: int) -> None:
+    """
+    Backfill EUVD from given year to present, maintaining a unique CSV.
+    """
     logging.info(f"[EUVD] backfill {year}..present")
     EUVD_DIR.mkdir(parents=True, exist_ok=True)
     if EUVD_CSV.exists():
@@ -859,10 +1069,15 @@ def euvd_backfill_from(year: int) -> None:
 # =============================================================================
 
 def _q_table(table: str, schema: Optional[str]):
+    """
+    Build a psycopg2 SQL identifier for [schema.]table.
+    """
     return sql.SQL(".").join([sql.Identifier(schema), sql.Identifier(table)]) if schema else sql.Identifier(table)
 
 def _infer_sql_types(df: pd.DataFrame) -> Dict[str, str]:
-    # very lightweight mapper; parquet will preserve dtypes best
+    """
+    Infer a minimal Postgres column type mapping from pandas dtypes.
+    """
     mapping = {}
     for col, dtype in df.dtypes.items():
         if pd.api.types.is_bool_dtype(dtype):
@@ -878,6 +1093,9 @@ def _infer_sql_types(df: pd.DataFrame) -> Dict[str, str]:
     return mapping
 
 def _create_table_if_needed(cur, table: str, schema_name: Optional[str], schema_map: Dict[str, str], pk: Optional[str]):
+    """
+    CREATE TABLE IF NOT EXISTS with optional PRIMARY KEY (for upsert mode).
+    """
     cols = [sql.SQL("{} {}").format(sql.Identifier(c), sql.SQL(t)) for c, t in schema_map.items()]
     if pk and pk in schema_map:
         cols.append(sql.SQL("PRIMARY KEY ({})").format(sql.Identifier(pk)))
@@ -885,9 +1103,15 @@ def _create_table_if_needed(cur, table: str, schema_name: Optional[str], schema_
     cur.execute(q)
 
 def _truncate_table(cur, table: str, schema_name: Optional[str]):
+    """
+    TRUNCATE TABLE target (used by replace mode).
+    """
     cur.execute(sql.SQL("TRUNCATE TABLE {}").format(_q_table(table, schema_name)))
 
 def _copy_dataframe(cur, df: pd.DataFrame, table: str, schema_name: Optional[str]):
+    """
+    Bulk COPY a DataFrame into Postgres using CSV over STDIN.
+    """
     buf = io.StringIO()
     df.to_csv(buf, index=False, header=False)
     buf.seek(0)
@@ -896,6 +1120,9 @@ def _copy_dataframe(cur, df: pd.DataFrame, table: str, schema_name: Optional[str
     cur.copy_expert(q.as_string(cur), buf)
 
 def _upsert_from_temp(cur, temp_table: str, dest_table: str, columns: List[str], pk: str, schema_name: Optional[str]):
+    """
+    INSERT ... ON CONFLICT (pk) DO UPDATE using a session-local temp table.
+    """
     cols_sql = sql.SQL(", ").join([sql.Identifier(c) for c in columns])
     updates = sql.SQL(", ").join([
         sql.SQL("{} = EXCLUDED.{}").format(sql.Identifier(c), sql.Identifier(c)) for c in columns if c != pk
@@ -910,6 +1137,13 @@ def _upsert_from_temp(cur, temp_table: str, dest_table: str, columns: List[str],
     cur.execute(q)
 
 def _connect_postgres(dsn: Optional[str], prompt_password: bool):
+    """
+    Establish a psycopg2 connection.
+
+    Priority:
+    1) Provided DSN
+    2) PG* environment variables (optionally prompt for password)
+    """
     password = None
     if prompt_password:
         password = getpass.getpass("Enter Postgres password: ")
@@ -937,13 +1171,32 @@ def upload_combined_to_postgres(
     prompt_password: bool = False,
 ) -> int:
     """
-    Loads data/clean/combined_master.parquet (preferred) or .csv into Postgres.
-    mode: append | replace | upsert
-    returns row count uploaded/affected
+    Load data/clean/combined_master.{parquet|csv} to Postgres.
+
+    Parameters
+    ----------
+    table : str
+        Destination table name.
+    schema_name : Optional[str]
+        Destination schema (None -> default search_path).
+    mode : {"append","replace","upsert"}
+        Upload mode. For "upsert", pk must exist in data and table.
+    pk : str
+        Primary key column for upsert.
+    dsn : Optional[str]
+        psycopg2 DSN; if None, uses PG* env vars (with optional prompt).
+    prompt_password : bool
+        If True, prompt for password (overrides PGPASSWORD).
+
+    Returns
+    -------
+    int
+        Number of rows uploaded/affected.
     """
     pq = CLEAN_DIR / "combined_master.parquet"
     cs = CLEAN_DIR / "combined_master.csv"
 
+    # Prefer parquet for preserved dtypes
     if pq.exists():
         df = pd.read_parquet(pq)
     elif cs.exists():
@@ -955,7 +1208,7 @@ def upload_combined_to_postgres(
         logging.info("[UPLOAD] nothing to upload (empty DataFrame)")
         return 0
 
-    # normalize column order/types
+    # Normalize schema from df dtypes
     df_norm = df.copy()
     schema_map = _infer_sql_types(df_norm)
 
@@ -963,10 +1216,11 @@ def upload_combined_to_postgres(
     conn.autocommit = False
     try:
         with conn.cursor() as cur:
-            # ensure target schema exists if provided
+            # Ensure schema exists (if provided)
             if schema_name:
                 cur.execute(sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(sql.Identifier(schema_name)))
 
+            # Create table if missing (pk only added for upsert mode creation)
             _create_table_if_needed(cur, table, schema_name, schema_map, pk if mode == "upsert" else None)
 
             if mode == "replace":
@@ -979,7 +1233,7 @@ def upload_combined_to_postgres(
             elif mode == "upsert":
                 if not pk or pk not in df_norm.columns:
                     raise ValueError("--pk must be a column of the data for upsert mode")
-                # create temp table
+                # Create a temp table matching the data schema
                 tmp = f"tmp_{table}_{int(time.time())}"
                 cols = [sql.SQL("{} {}").format(sql.Identifier(c), sql.SQL(schema_map[c])) for c in df_norm.columns]
                 cur.execute(sql.SQL("CREATE TEMP TABLE {} ({})").format(sql.Identifier(tmp), sql.SQL(", ").join(cols)))
@@ -1003,6 +1257,13 @@ def upload_combined_to_postgres(
 # =============================================================================
 
 def run_once(args) -> None:
+    """
+    Execute a single end-to-end refresh:
+    - NVD/KEV/JVN/EUVD increments
+    - Merge unified table
+    - Optional Postgres upload
+    - Update watermarks/state
+    """
     state = load_state()
     logging.info("=== refresh start ===")
 
@@ -1029,15 +1290,21 @@ def run_once(args) -> None:
     # MERGE unified table
     merged_len = 0
     def _merge_wrapper():
+        """
+        Wrapper to capture merged length for logging outside of try_step.
+        """
         nonlocal merged_len
         df = merge_clean.consolidate()
         merged_len = len(df)
         logging.info(f"[MERGE] combined rows: {merged_len:,}")
     try_step("MERGE", _merge_wrapper)
 
-    # NEW: optional DB upload
+    # Optional DB upload after successful merge
     if args.upload:
         def _upload_wrapper():
+            """
+            Wrapper to call the upload with CLI-provided arguments.
+            """
             rows = upload_combined_to_postgres(
                 table=args.upload_table,
                 schema_name=args.upload_schema,
@@ -1055,6 +1322,12 @@ def run_once(args) -> None:
     logging.info("=== refresh end (partial success possible) ===")
 
 def main():
+    """
+    CLI entry point:
+    - Parses arguments
+    - Handles one-shot modes (--run-once, --init-nvd, --from-year)
+    - Starts daily scheduler if not one-shot
+    """
     setup_logging()
 
     parser = argparse.ArgumentParser(description="Daily pulls for NVD/KEV/JVN/EUVD + merge + optional Postgres upload.")
@@ -1080,6 +1353,7 @@ def main():
         d.mkdir(parents=True, exist_ok=True)
 
     if args.init_nvd:
+        # One-time full NVD build
         if args.end_year is None:
             nvd_backfill_from(args.start_year)
         else:
@@ -1098,7 +1372,7 @@ def main():
                 except Exception as e:
                     logging.warning(f"[NVD] year {y} failed: {e}")
 
-        # Merge after --init-nvd
+        # Merge (and optional upload) after --init-nvd
         try:
             logging.info("[MERGE] after --init-nvd")
             df = merge_clean.consolidate()
@@ -1117,6 +1391,7 @@ def main():
         return
 
     if args.from_year:
+        # One-time full backfill for all sources
         yr = int(args.from_year)
         logging.info(f"[BACKFILL] {yr}..present (all sources)")
         try_step("NVD backfill", nvd_backfill_from, yr)
@@ -1146,13 +1421,14 @@ def main():
                     prompt_password=args.prompt_password,
                 )
         except Exception as e:
-            logging.exception(f("[MERGE/UPLOAD] failed after backfill: {e}"))
+            logging.exception(f"[MERGE/UPLOAD] failed after backfill: {e}")
 
     if args.run_once:
+        # Run a single refresh cycle and exit
         run_once(args)
         return
 
-    # schedule
+    # Otherwise, start the scheduler
     try:
         hh, mm = args.time.split(":")
         hour, minute = int(hh), int(mm)
@@ -1161,6 +1437,7 @@ def main():
         raise SystemExit("Bad --time. Use HH:MM, e.g. 06:00")
 
     sched = BackgroundScheduler(timezone=LOCAL_TZ)
+    # Use a lambda to capture current args each run
     sched.add_job(lambda: run_once(args), CronTrigger(hour=hour, minute=minute, timezone=LOCAL_TZ))
     sched.start()
     logging.info(f"scheduler: daily {args.time} ({LOCAL_TZ.key}) -> {LOG_FILE}")

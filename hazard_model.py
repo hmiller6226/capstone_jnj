@@ -1,234 +1,291 @@
-#!/usr/bin/env python3
-import argparse
-import numpy as np
 import pandas as pd
+import numpy as np
 from lifelines import CoxPHFitter
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-# -----------------------------------------------------------
-# Date parsing
-# -----------------------------------------------------------
-def parse_dates(df: pd.DataFrame) -> pd.DataFrame:
-    date_cols = [
-        "published_date", "nvd_published", "jvn_published",
-        "eu_published", "kev_published", "lastmodified",
-        "dateupdated", "published"
-    ]
-    for c in date_cols:
-        if c in df.columns:
-            df[c] = pd.to_datetime(df[c], errors="coerce", utc=True)
-    return df
+# Load data
+df = pd.read_csv("C:/Users/jvgat/Downloads/Hazard/df_after_feature_engineering.csv")
+date_cols = ['published_date','kev_published']
+for col in date_cols:
+    df[col] = pd.to_datetime(df[col], errors='coerce', utc=True)
 
+df['time_to_event'] = (df['kev_published'] - df['published_date']).dt.total_seconds() / (60*60*24)
+df['event'] = df['kev_present']
+df.loc[df['event'] == 0, 'time_to_event'] = (pd.Timestamp.now(tz='UTC') - df.loc[df['event'] == 0, 'published_date']).dt.total_seconds() / (60*60*24)
 
-# -----------------------------------------------------------
-# Choose effective publication date
-# -----------------------------------------------------------
-def choose_published(row: pd.Series):
-    for c in [
-        "published_date", "nvd_published", "jvn_published",
-        "eu_published", "published"
-    ]:
-        if c in row and pd.notna(row[c]):
-            return row[c]
-    return pd.NaT
+features = ['base_score', 'repo_publication_lag', 'cross_listing_count','cross_listing_variance', 'cwe_risk_factor']
+df_model = df[features + ['time_to_event', 'event']].dropna().copy()
 
+# Apply transformations
+df_model['repo_publication_lag_rank'] = df_model['repo_publication_lag'].rank()
+df_model['cross_listing_variance_sqrt'] = np.sqrt(df_model['cross_listing_variance'])
 
-# -----------------------------------------------------------
-# Build time-to-event + event indicator
-# -----------------------------------------------------------
-def build_time_to_event(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Set:
-      - event = kev_present (1 if KEV, else 0)
-      - time_to_event (days) from published_effective to KEV (event)
-        or to ref (censoring).
-    """
-    df = df.copy()
-    df["published_effective"] = df.apply(choose_published, axis=1)
-    now = pd.Timestamp.now(tz="UTC")
+# FIXED: Better categorization based on actual data distribution
+print("Cross-listing count distribution:")
+print(df_model['cross_listing_count'].describe())
+print("\nCWE risk factor distribution:")
+print(df_model['cwe_risk_factor'].describe())
 
-    # Reference date for censoring
-    ref = df[["lastmodified", "dateupdated", "kev_published"]].max(axis=1)
-    ref = ref.fillna(now)
+# Create categories that actually have data
+df_model['cross_listing_count_cat'] = pd.cut(
+    df_model['cross_listing_count'], 
+    bins=[0, 1, 2, float('inf')],  # Adjusted bins
+    labels=['1', '2', '3']
+)
 
-    # Event indicator
-    df["event"] = df["kev_present"].astype(int)
+df_model['cwe_risk_category'] = pd.qcut(
+    df_model['cwe_risk_factor'], 
+    q=4,  # Reduced to 3 categories
+    labels=['low', 'medium', 'high','critical'],
+    duplicates='drop'
+)
 
-    # Event rows: from published_effective to kev_published
-    mask_e = (
-        df["event"].eq(1)
-        & df["kev_published"].notna()
-        & df["published_effective"].notna()
-    )
-    df.loc[mask_e, "time_to_event"] = (
-        df.loc[mask_e, "kev_published"]
-        - df.loc[mask_e, "published_effective"]
-    ).dt.total_seconds() / (60 * 60 * 24)
+# Verify the new distribution
+print("\nNew strata distribution:")
+strata_counts = df_model.groupby(['cross_listing_count_cat', 'cwe_risk_category'], observed=True).size()
+print(strata_counts)
+print(f"\nNumber of valid strata: {len(strata_counts[strata_counts > 0])}")
 
-    # Censored rows: from published_effective to ref date
-    mask_c = df["event"].eq(0) & df["published_effective"].notna()
-    df.loc[mask_c, "time_to_event"] = (
-        ref[mask_c] - df.loc[mask_c, "published_effective"]
-    ).dt.total_seconds() / (60 * 60 * 24)
+# Define transformed features and columns to include
+transformed_features = ['base_score', 'repo_publication_lag_rank', 
+                       'cross_listing_variance_sqrt']
 
-    # Clean
-    df = df.dropna(subset=["time_to_event"]).copy()
-    df["time_to_event"] = df["time_to_event"].clip(lower=1.0, upper=3650.0)
+model_cols = transformed_features + ['time_to_event', 'event', 
+                                     'cross_listing_count_cat', 'cwe_risk_category']
 
-    return df
+df_final = df_model[model_cols].copy()
 
+# Fit model with fixed stratification
+cph = CoxPHFitter()
+cph.fit(df_final, 
+        duration_col='time_to_event', 
+        event_col='event',
+        strata=['cross_listing_count_cat', 'cwe_risk_category'])
 
-# -----------------------------------------------------------
-# Numeric features for Cox model
-# -----------------------------------------------------------
-def build_features(df: pd.DataFrame):
-    """
-    Standardize numeric covariates and build the modeling frame
-    for CoxPH.
-    """
-    df = df.copy()
-    candidates = [
-        "base_score", "nvd_base_score", "jvn_base_score", "eu_base_score",
-        "epss", "source_count", "is_known_exploited",
-        "cvss_exploitability", "cvss_impact",
-    ]
+print("\n" + "="*50)
+print("Model Summary:")
+print("="*50)
+print(cph.summary)
 
-    features = []
-    for c in candidates:
-        if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce")
-            df[c] = df[c].fillna(df[c].median())
-            mean, std = df[c].mean(), df[c].std()
-            if std > 0:
-                df[c] = (df[c] - mean) / std
-                features.append(c)
+# Check assumptions
+cph.check_assumptions(df_final, 
+                      columns=transformed_features, 
+                      p_value_threshold=0.05, 
+                      show_plots=True)
 
-    if not features:
-        raise ValueError(
-            "No usable numeric features found. "
-            f"Expected at least one of: {candidates}"
-        )
+print(f"\nConcordance index: {cph.concordance_index_}")
 
-    df_model = df[["time_to_event", "event"] + features].dropna().copy()
-    return df_model, features
+df_final[df_final['event'] == 0].groupby( ['cross_listing_count_cat', 'cwe_risk_category'] ).size()
 
+df_final[df_final['event'] == 1].groupby( ['cross_listing_count_cat', 'cwe_risk_category'] ).size()
 
-# -----------------------------------------------------------
-# Interpolated days-to-KEV from survival model
-# -----------------------------------------------------------
-def interpolated_days_to_kev(
-    df_model: pd.DataFrame,
-    cph: CoxPHFitter,
-    features: list,
-    df_original: pd.DataFrame,
-    low_q: float = 0.15,   # start at 15th percentile KEV time
-    high_q: float = 0.95,  # end at 95th percentile KEV time
-    gamma: float = 0.3,    # stronger smoothing (< 0.5 → earlier days rarer)
-) -> pd.DataFrame:
-    """
-    1) Use CoxPH to get relative risk (partial hazards).
-    2) Convert to percentile ranks (0..1; higher = riskier).
-    3) Build empirical KEV timing curve from event=1 rows.
-    4) Interpolate ranks into KEV timing distribution with
-       smoothed top tail, and floor/ceiling the days.
-    """
-    # ---- 1. Cox risk scores ----
-    risk = cph.predict_partial_hazard(df_model[features]).values
+# ------------------------------
+# 1) Keep only non-KEVs
+# ------------------------------
+df_nonkev = df_final[df_final['event'] == 0].copy()
 
-    # Rank → percentile (0..1); higher = riskier
-    ranks = pd.Series(risk).rank(method="average", pct=True).values
+# ------------------------------
+# 2) Compute partial hazard for non-KEVs
+# ------------------------------
+df_nonkev['risk_score'] = cph.predict_partial_hazard(df_nonkev)
 
-    # ---- 2. Empirical KEV timing distribution ----
-    kev_times = df_model.loc[df_model["event"] == 1, "time_to_event"].values
-    if len(kev_times) < 5:
-        raise ValueError(
-            "Not enough KEV events to build interpolated timing curve "
-            f"(got {len(kev_times)} events, need at least 5)."
-        )
+# ------------------------------
+# 3) Merge metadata
+# ------------------------------
+df_nonkev = df_nonkev.merge(
+    df[['vendorProject', 'product', 'vulnerabilityName','cve_id','description_nvd','description_jvn','description']],
+    left_index=True,
+    right_index=True,
+    how='left'
+)
 
-    kev_times_sorted = np.sort(kev_times)
+# ------------------------------
+# 4) Create stratum column
+# ------------------------------
+df_nonkev['stratum'] = (
+    df_nonkev['cross_listing_count_cat'].astype(str) + '/' +
+    df_nonkev['cwe_risk_category'].astype(str)
+)
 
-    # Quantile positions for sorted KEV times (0..1)
-    q_positions = np.linspace(0.0, 1.0, len(kev_times_sorted))
+# ------------------------------
+# 5) Focus on selected strata
+# ------------------------------
+strata_focus = ['2/low', '2/medium', '2/high', '2/critical']
+df_focus = df_nonkev[df_nonkev['stratum'].isin(strata_focus)]
 
-    # ---- 3. Map risk percentile into [low_q, high_q] with smoothing ----
-    low_q = float(low_q)
-    high_q = float(high_q)
-    gamma = float(gamma)
+# ------------------------------
+# 6) Average survival curves per stratum
+# ------------------------------
+fig, ax = plt.subplots(figsize=(12, 6))
 
-    if not (0.0 <= low_q < high_q <= 1.0):
-        raise ValueError("Require 0 <= low_q < high_q <= 1.")
-    if not (0.0 < gamma < 1.0):
-        raise ValueError("gamma should be in (0,1) for tail smoothing.")
+for stratum in strata_focus:
+    df_stratum = df_focus[df_focus['stratum'] == stratum]
+    
+    if df_stratum.empty:
+        continue
+    
+    # Predict survival functions for all rows in this stratum
+    surv_funcs = cph.predict_survival_function(df_stratum)
+    
+    # Compute average survival at each time point
+    avg_surv = surv_funcs.mean(axis=1)
+    
+    ax.plot(avg_surv.index, avg_surv.values, label=stratum, linewidth=2)
 
-    # q_raw: 1 - rank → high risk gives small q_raw
-    q_raw = 1.0 - ranks
+ax.set_title("Average Predicted Survival Functions — Medium Cross-Listing (Non-KEVs)")
+ax.set_xlabel("Time")
+ax.set_ylabel("Average Survival Probability")
+ax.legend(title="Stratum")
+plt.tight_layout()
+plt.show()
 
-    # Strong tail smoothing: gamma < 1 makes early times rarer
-    q_scaled = q_raw ** gamma
+sns.histplot(df_focus, x='risk_score', hue='stratum', kde=True, bins=30)
+plt.title("Hazard Score Distribution — Medium Cross-Listing (Non-KEVs)")
+plt.xlabel("Predicted Partial Hazard (Risk Score)")
+plt.ylabel("Count")
+plt.show()
 
-    # Map to effective quantiles
-    q_eff = low_q + q_scaled * (high_q - low_q)
-    q_eff = np.clip(q_eff, low_q, high_q)
+for stratum in strata_focus:
+    df_stratum = df_focus[df_focus['stratum'] == stratum]
+    cumhaz = cph.predict_cumulative_hazard(df_stratum).mean(axis=1)
+    plt.plot(cumhaz.index, cumhaz.values, label=stratum)
 
-    # ---- 4. Continuous interpolation ----
-    mapped_days = np.interp(q_eff, q_positions, kev_times_sorted)
-
-    # ---- 5. Floor and ceiling for realism ----
-    # Floor at max(14 days, 5th percentile of KEV times)
-    floor_days = max(14.0, float(np.quantile(kev_times_sorted, 0.05)))
-    # Ceiling at 97th percentile of KEV times
-    ceil_days = float(np.quantile(kev_times_sorted, 0.97))
-
-    mapped_days = np.clip(mapped_days, floor_days, ceil_days)
-
-    # ---- 6. Attach CVE IDs ----
-    result = pd.DataFrame(
-        {
-            "cve_id": df_original.loc[df_model.index, "cve_id"].values,
-            "days_to_kev": mapped_days,
-        }
-    )
-
-    return result
+plt.title("Average Cumulative Hazard — Medium Cross-Listing (Non-KEVs) ")
+plt.xlabel("Time")
+plt.ylabel("Cumulative Hazard")
+plt.legend(title="Stratum")
+plt.show()
 
 
-# -----------------------------------------------------------
-# Main entry
-# -----------------------------------------------------------
-def main(input_csv: str, output_csv: str):
-    print("Loading:", input_csv)
-    df = pd.read_csv(input_csv, low_memory=False)
-    df = parse_dates(df)
+sns.boxplot(data=df_focus, x='stratum', y='risk_score')
+plt.title("Hazard Score Distribution - Medium Cross-Listing (Non-KEVs)")
+plt.xlabel("Stratum")
+plt.ylabel("Predicted Partial Hazard")
+plt.show()
 
-    print("Building time-to-event...")
-    df_time = build_time_to_event(df)
+# ------------------------------
+# Non-KEVs in 2/critical — Predicted Survival & leveling-off time
+# ------------------------------
 
-    print("Building feature matrix...")
-    df_model, features = build_features(df_time)
+# 1) Filter non-KEVs in stratum 2/critical
+df_critical_nonkev = df_nonkev[df_nonkev['stratum'] == '2/critical'].copy()
 
-    print("Training Cox model...")
-    cph = CoxPHFitter(penalizer=0.1)
-    cph.fit(df_model, duration_col="time_to_event", event_col="event")
-    print("Concordance Index:", cph.concordance_index_)
+if df_critical_nonkev.empty:
+    print("No non-KEVs in the '2/critical' stratum.")
+else:
+    # 2) Predict survival functions for these rows
+    surv_funcs = cph.predict_survival_function(df_critical_nonkev)
 
-    print("Interpolating days-to-KEV (sparser early bucket)...")
-    out = interpolated_days_to_kev(
-        df_model,
-        cph,
-        features,
-        df_time,
-        low_q=0.15,   # 15th–95th KEV quantiles
-        high_q=0.95,
-        gamma=0.3,    # stronger smoothing → earliest KEV days rarer
-    )
+    # 3) Predicted survival at final observed time
+    final_time = surv_funcs.index[-1]
+    df_critical_nonkev['predicted_survival_probability'] = surv_funcs.loc[final_time].values
 
-    out.to_csv(output_csv, index=False)
-    print("Saved:", output_csv)
+    # 4) Compute "leveling-off" time: last time the survival curve decreases
+    leveling_times = []
+    for idx in df_critical_nonkev.index:
+        surv = surv_funcs[idx]
+        decreasing_times = surv[surv.diff() < 0].index  # times where survival decreases
+        leveling_times.append(decreasing_times[-1] if len(decreasing_times) > 0 else np.nan)
+
+    df_critical_nonkev['survival plateau date'] = leveling_times
+
+    # 5) Build table
+    table = df_critical_nonkev[[
+        'cve_id', 'risk_score', 'predicted_survival_probability', 'survival plateau date'
+    ]].sort_values('predicted_survival_probability')
+
+    print("\nPredicted Survival & Leveling-Off Time — Non-KEVs in 2/critical:")
+    print(table.to_string(index=False))
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input", required=True, help="Path to combined_master.csv")
-    parser.add_argument("--output", default="days_to_kev.csv", help="Output CSV path")
-    args = parser.parse_args()
-    main(args.input, args.output)
+# --- Step 0: Focus on non-KEVs in critical stratum ---
+df_critical_nonkev = df_focus[(df_focus['stratum'] == '2/critical') & (df_focus['event'] == 0)].copy()
+
+# --- Step 1: Compute risk score ---
+df_critical_nonkev['risk_score'] = cph.predict_partial_hazard(df_critical_nonkev)
+
+# --- Step 2: Predict survival functions (up to 1691 days) ---
+surv_funcs = cph.predict_survival_function(df_critical_nonkev)
+surv_funcs = surv_funcs[surv_funcs.index <= 1691]
+
+# --- Step 3a: Fixed survival threshold (absolute risk) ---
+fixed_threshold = 0.90  # e.g., survival drops below 90%
+predicted_days_fixed = []
+for idx in surv_funcs.columns:
+    surv_series = surv_funcs[idx]
+    below = surv_series[surv_series <= fixed_threshold]
+    if not below.empty:
+        predicted_days_fixed.append(below.index[0])
+    else:
+        predicted_days_fixed.append(np.nan)
+df_critical_nonkev['predicted_day_to_kev_fixed'] = predicted_days_fixed
+
+# --- Step 3b: Data-driven survival threshold (quantile-based) ---
+all_surv_values = surv_funcs.values.flatten()
+quantile_threshold = np.quantile(all_surv_values, 0.05)  # 5th percentile
+print("Data-driven survival threshold (5th percentile):", quantile_threshold)
+
+predicted_days_quantile = []
+for idx in surv_funcs.columns:
+    surv_series = surv_funcs[idx]
+    below = surv_series[surv_series <= quantile_threshold]
+    if not below.empty:
+        predicted_days_quantile.append(below.index[0])
+    else:
+        predicted_days_quantile.append(np.nan)
+df_critical_nonkev['predicted_day_to_kev_quantile'] = predicted_days_quantile
+
+# --- Step 4: Final table ---
+table = df_critical_nonkev[['cve_id', 'risk_score', 
+                            'predicted_day_to_kev_fixed', 
+                            'predicted_day_to_kev_quantile', 'description','vendorProject', 'product', 'vulnerabilityName']] \
+        .sort_values('risk_score', ascending=False)
+
+print(table.head(50).to_string(index=False))
+
+table.to_csv("hazard_outputs.csv",index=False)
+
+import plotly.express as px
+
+# Prepare a combined dataframe with both threshold predictions
+df_plot = df_critical_nonkev.copy()
+df_plot['predicted_day_to_kev_fixed'] = df_plot['predicted_day_to_kev_fixed']
+df_plot['predicted_day_to_kev_quantile'] = df_plot['predicted_day_to_kev_quantile']
+
+# Interactive scatter plot
+fig = px.scatter(
+    df_plot,
+    x='risk_score',
+    y='predicted_day_to_kev_fixed',
+    color='risk_score',
+    color_continuous_scale='Reds',
+    hover_data={
+        'cve_id': True,
+        'risk_score': True,
+        'predicted_day_to_kev_fixed': True,
+        'predicted_day_to_kev_quantile': True
+    },
+    labels={
+        'risk_score': 'Predicted Risk Score',
+        'predicted_day_to_kev_fixed': 'Predicted Days to KEV (Fixed Threshold)'
+    },
+    title='Predicted Days to KEV vs Risk Score — Critical Stratum Non-KEVs',
+    opacity=0.7
+)
+
+# Add quantile threshold lines (optional)
+quantiles = [0.5, 0.75, 0.9]
+for q in quantiles:
+    q_value = df_plot['risk_score'].quantile(q)
+    fig.add_vline(x=q_value, line=dict(color='gray', dash='dash'), annotation_text=f"{int(q*100)}%", 
+                  annotation_position="top right")
+
+# Highlight high-risk region (>90th percentile)
+high_risk_threshold = df_plot['risk_score'].quantile(0.9)
+fig.add_vrect(x0=high_risk_threshold, x1=df_plot['risk_score'].max(), 
+              fillcolor="yellow", opacity=0.2, layer="below", line_width=0, 
+              annotation_text="High-risk region (>90th percentile)", annotation_position="top left")
+
+fig.update_layout(coloraxis_colorbar=dict(title="Risk Score"))
+fig.show()

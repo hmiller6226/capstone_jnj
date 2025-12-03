@@ -492,7 +492,7 @@ def make_hazard_figure(dff):
         layer="below",
         line_width=0,
         annotation_text="High hazard-risk region (>90th percentile)",
-        annotation_position="top left",
+        annotation_position="top right",
     )
 
     fig.update_xaxes(range=[x_min - 0.05 * span, x_max + 0.05 * span])

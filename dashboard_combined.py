@@ -23,7 +23,7 @@ import numpy as np
 # ==============================
 # CONFIG
 # ==============================
-CSV_PATH = "kde_scores.csv"
+CSV_PATH = "kde_scores_split.csv"
 RISK_SCORE_COL = "risk_score"          # KDE risk score
 HAZARD_RISK_COL = "hazard_risk_score"  # hazard-model risk (from hazard_outputs.csv)
 VECTOR_COL = "cvss_vectorstring"       # CVSS vectorstring column
@@ -141,7 +141,7 @@ else:
     df["repo_publication_lag_clean"] = None
 
 # ---- CVSS base-score columns ----
-for col in ["nvd_base_score", "jvn_cvss_score", "euvd_basescore"]:
+for col in ["nvd_base_score", "jvn_cvss_score", "eu_base_score"]:
     if col in df.columns:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
@@ -346,10 +346,6 @@ app.layout = html.Div(
                     id="top-risk-table",
                     columns=[
                         {"name": "CVE ID", "id": "cve_id"},
-                        {"name": "Vendor", "id": "vendorProject"},
-                        {"name": "Product", "id": "product"},
-                        {"name": "Vulnerability Name", "id": "vulnerabilityName"},
-                        {"name": "Description", "id": "description"},
                         {"name": "Risk Score (KDE)", "id": RISK_SCORE_COL},
                         {"name": "Hazard Risk Score", "id": HAZARD_RISK_COL},
                         {
@@ -572,8 +568,8 @@ def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
     # ---------- 3) Risk Correlation ----------
     pair_map = {
         "nvd_jvn": ("nvd_base_score", "jvn_cvss_score", "NVD Base", "JVN Score"),
-        "nvd_euvd": ("nvd_base_score", "euvd_basescore", "NVD Base", "EUVD Base"),
-        "jvn_euvd": ("jvn_cvss_score", "euvd_basescore", "JVN Score", "EUVD Base"),
+        "nvd_euvd": ("nvd_base_score", "eu_base_score", "NVD Base", "EUVD Base"),
+        "jvn_euvd": ("jvn_cvss_score", "eu_base_score", "JVN Score", "EUVD Base"),
     }
     x_col, y_col, x_label, y_label = pair_map[score_pair]
     corr_df = dff.dropna(subset=[x_col, y_col])
@@ -713,10 +709,6 @@ def update_top_risk_table(search_value, year_range, severities, kev_mode, hazard
 
     keep_cols = [
         "cve_id",
-        "vendorProject",
-        "product",
-        "vulnerabilityName",
-        "description",
         RISK_SCORE_COL,
         HAZARD_RISK_COL,
         "predicted_day_to_kev_quantile_display",

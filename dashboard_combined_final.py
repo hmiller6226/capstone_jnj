@@ -584,6 +584,7 @@ def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
 
     # ---------- 4) KEV Lead Time ----------
     kev_df = dff[(dff["is_kev"] == 1) & (dff["is_high_risk"] == True)].dropna(subset=["days_to_kev"])
+    kev_df = kev_df[kev_df['severity'] != 'NAN']
     if not kev_df.empty:
         fig_lead = px.box(kev_df, x="severity", y="days_to_kev",
                           title="KEV Lead Time (Days)")

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 Usage:
     python build_features.py \
@@ -13,7 +11,6 @@ import numpy as np
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-# --- Define clean_cve_df
 def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = df.columns.str.strip()
@@ -21,7 +18,6 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
     def _col(name: str, fill=""):
         return df[name] if name in df.columns else pd.Series([fill] * len(df), index=df.index)
 
-    # Ensure cve_id
     if "cve_id" not in df.columns:
         for c in df.columns:
             if "cve" in c.lower() and "id" in c.lower():
@@ -34,7 +30,6 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
         .str.extract(r"(CVE-\d{4}-\d+)", expand=False)
     )
 
-    # Parse dates
     date_cols = [c for c in df.columns if ("date" in c.lower()) or ("published" in c.lower())]
     for c in date_cols:
         df[c] = pd.to_datetime(df[c], errors="coerce")
@@ -57,7 +52,6 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
         df[pub_candidates].bfill(axis=1).iloc[:, 0] if pub_candidates else pd.NaT
     )
 
-    # Base score (best-effort)
     score_cols = [
         c
         for c in [
@@ -77,7 +71,6 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
         df[score_cols].bfill(axis=1).iloc[:, 0] if score_cols else np.nan
     )
 
-    # Severity
     sev_cols = [c for c in df.columns if "severity" in c.lower()]
     if sev_cols:
         df["severity"] = (
@@ -89,7 +82,6 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
     else:
         df["severity"] = np.nan
 
-    # KEV flag construction
     kev_cols = [
         c
         for c in [
@@ -108,16 +100,12 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
             v = row.get(c, np.nan)
             if pd.isna(v):
                 continue
-            # booleans
             if isinstance(v, (bool, np.bool_)) and v:
                 return True
-            # numeric 1
             if isinstance(v, (int, float, np.integer, np.floating)) and v == 1:
                 return True
-            # timestamp
             if isinstance(v, pd.Timestamp):
                 return True
-            # strings like "true", "2021-01-01"
             s = str(v).strip().lower()
             if s in {"true", "1", "yes"}:
                 return True
@@ -127,10 +115,8 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
 
     df["is_kev"] = df.apply(_row_is_kev, axis=1)
 
-    # Description length (if present)
     df["desc_len"] = _col("description", "").astype(str).str.len()
 
-    # References count
     if "references_count" in df.columns:
         df["references_count"] = (
             pd.to_numeric(df["references_count"], errors="coerce")
@@ -143,7 +129,6 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
             refs_text.astype(str).str.count(r"https?://").fillna(0).astype(int)
         )
 
-    # CVE year
     df["cve_year"] = (
         df["cve_id"]
         .astype(str)
@@ -151,17 +136,15 @@ def clean_cve_df(df: pd.DataFrame) -> pd.DataFrame:
         .astype(float)
     )
 
-    # Drop duplicate CVEs
     df = df.drop_duplicates(subset="cve_id")
 
     return df
 
 
-# --- Define build_feature_set
 def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
-    # ------------- days_to_kev -------------
+    #days_to_kev
     if {"kev_published", "published_date"} <= set(df.columns):
         df["days_to_kev"] = (
             pd.to_datetime(df["kev_published"], errors="coerce", utc=True)
@@ -170,7 +153,7 @@ def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
     else:
         df["days_to_kev"] = np.nan
 
-    # ------------- repo_publication_lag -------------
+    #repo_lag_time
     pub_cols = [c for c in ["nvd_published", "jvn_published", "eu_published"] if c in df.columns]
     if pub_cols:
         pub_dates = df[pub_cols].apply(pd.to_datetime, errors="coerce", utc=True)
@@ -182,7 +165,7 @@ def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
     else:
         df["repo_publication_lag"] = np.nan
 
-    # ------------- update_frequency -------------
+    #update_frequency
     lastmod_col = None
     if "lastModified" in df.columns:
         lastmod_col = "lastModified"
@@ -197,7 +180,7 @@ def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
     else:
         df["update_frequency"] = np.nan
 
-    # ------------- time_since_first_reference (synthetic) -------------
+    # time_since_first_reference
     if {"references", "published_date"} <= set(df.columns):
         pub_dt = pd.to_datetime(df["published_date"], errors="coerce", utc=True)
         # Synthetic "first reference" within 0-29 days after publication
@@ -208,7 +191,7 @@ def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
     else:
         df["time_since_first_reference"] = np.nan
 
-    # ------------- cross_listing_* -------------
+    # cross_listing
     src_flags = [c for c in df.columns if c.endswith("_present") and "kev" not in c.lower()]
     if src_flags:
         df["cross_listing_count"] = (
@@ -231,7 +214,6 @@ def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
             df["cross_listing_std_days"] = np.nan
             df["cross_listing_variance"] = np.nan
 
-        # Keep as dict for possible later use
         df["repo_coverage_vector"] = (
             df[src_flags].astype(float).fillna(0).astype(int).apply(
                 lambda row: row.to_dict(), axis=1
@@ -243,7 +225,7 @@ def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
         df["cross_listing_variance"] = np.nan
         df["repo_coverage_vector"] = [{}] * len(df)
 
-    # ------------- CWE-based features -------------
+    # CWE features
     if "cwes" in df.columns:
         df["cwe_category"] = df["cwes"].astype(str).str.extract(
             r"(CWE-\d+)", expand=False
@@ -263,7 +245,7 @@ def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
         df["weakness_frequency"] = np.nan
         df["cwe_risk_factor"] = np.nan
 
-    # ------------- Description + text features -------------
+    # Text features
     if "description" in df.columns:
         desc = df["description"].astype(str).fillna("")
         df["desc_len"] = desc.str.len()
@@ -289,23 +271,18 @@ def build_feature_set(df: pd.DataFrame) -> pd.DataFrame:
             )
             df = pd.concat([df, tfidf_df], axis=1)
     else:
-        # Ensure these exist even if description column is absent
         df["desc_len"] = np.nan
         df["word_count"] = np.nan
         df["keyword_indicators"] = np.nan
-        # Create an empty description column so downstream indexing works
         df["description"] = ""
 
-    # ------------- Ensure metadata columns exist -------------
-    # These are the columns you mentioned in the KeyError.
-    # If they weren't in the original CSV, create them as empty strings.
+
     passthrough_cols = [
         "vendorProject",
         "product",
         "vulnerabilityName",
         "description_nvd",
         "description_jvn",
-        # "description" is already guaranteed above
     ]
     for col in passthrough_cols:
         if col not in df.columns:

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Daily vulnerability pipeline:
 - Pulls data from NVD/KEV/JVN/EUVD
@@ -1299,7 +1298,6 @@ def main():
     sched.add_job(lambda: run_once(cli), CronTrigger(hour=hour, minute=minute, timezone=TZ_LOCAL))
     sched.start()
     logging.info(f"scheduler: daily {cli.time} ({TZ_LOCAL.key}) -> {PATH_LOG}")
-
     try:
         while True:
             time.sleep(60)

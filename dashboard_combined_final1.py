@@ -1,19 +1,3 @@
-# dashboard.py
-"""
-CVE Risk & Coverage Dashboard with CVSS Vectorstring attack-vector analysis.
-
-Features:
-- Parses cvss_vectorstring to extract Attack Vector (AV) and other metrics.
-- Attack Vector distribution chart (counts).
-- P(KEV | AttackVector) chart (probabilities).
-- Top cvss_vectorstring entries by P(KEV | vectorstring) (requires minimum support).
-- Defensive handling for missing columns.
-- Integrates hazard model outputs (quantile-based predicted_days_to_kev) with:
-  - "Never" (from hazard model)
-  - "No Prediction" (for CVEs outside hazard stratum)
-- Filter to restrict view to CVEs with hazard predictions.
-"""
-
 import pandas as pd
 from dash import Dash, dcc, html, Input, Output, dash_table
 import plotly.express as px
@@ -22,9 +6,9 @@ import numpy as np
 
 #Config
 CSV_PATH = "/Users/kelvinguyen2/Documents/data/model/model_scores.csv"
-RISK_SCORE_XGBOOST = "risk_score_xgb"          # KDE risk score
+RISK_SCORE_XGBOOST = "risk_score_xgb"          # XGB risk score
 RISK_SCORE_KDE = "risk_score_kde"
-HAZARD_RISK_COL = "hazard_risk_score"  # hazard-model risk (from hazard_outputs.csv)
+HAZARD_RISK_COL = "hazard_risk_score"  # hazard-model risk
 VECTOR_COL = "cvss_vectorstring"       # CVSS vectorstring column
 
 
@@ -368,7 +352,6 @@ def filter_df(df_in, year_range, severities, kev_mode, hazard_mode):
     # Hazard prediction filter
     if hazard_mode == "hazard":
         # Keep only rows that actually have a hazard prediction
-        # (i.e., not "No Prediction")
         if "predicted_day_to_kev_quantile_display" in dff.columns:
             dff = dff[dff["predicted_day_to_kev_quantile_display"] != "No Prediction"]
 
@@ -489,7 +472,7 @@ def make_hazard_figure(dff):
 def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
     dff = filter_df(df, year_range, severities, kev_mode, hazard_mode)
 
-    # ---------- 1) Cross-Listing ----------
+    # Cross listing
     if "cross_listing_count" in dff.columns:
         tmp = dff.copy()
         tmp["Cross-Listed?"] = tmp["cross_listing_count"].ge(2)
@@ -500,7 +483,7 @@ def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
     else:
         fig_cross = go.Figure().add_annotation(text="Missing cross_listing_count", x=0.5, y=0.5, showarrow=False)
 
-    # ---------- 2) Registration Lag ----------
+    # Registration Lag
     if "repo_publication_lag_clean" in dff.columns:
         lag_df = dff.dropna(subset=["repo_publication_lag_clean"]).copy()
 
@@ -533,7 +516,7 @@ def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
             x=0.5, y=0.5, showarrow=False,
         )
 
-    # ---------- 3) Risk Correlation ----------
+    # Risk Correlation
     pair_map = {
         "nvd_jvn": ("nvd_base_score", "jvn_base_score", "NVD Base", "JVN Score"),
         "nvd_euvd": ("nvd_base_score", "eu_base_score", "NVD Base", "EUVD Base"),
@@ -550,7 +533,7 @@ def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
     else:
         fig_corr = go.Figure().add_annotation(text="No correlation data", x=0.5, y=0.5, showarrow=False)
 
-    # ---------- 4) KEV Lead Time ----------
+    # KEV Lead Time
     kev_df = dff[(dff["is_kev"] == 1) & (dff["is_high_risk"] == True)].dropna(subset=["days_to_kev"])
     kev_df = kev_df[kev_df['severity'] != 'NAN']
     if not kev_df.empty:
@@ -559,7 +542,7 @@ def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
     else:
         fig_lead = go.Figure().add_annotation(text="No KEV lead-time data", x=0.5, y=0.5, showarrow=False)
 
-    # ---------- 5) Attack Vector Distribution ----------
+    # Attack Vector Distribution
     if "cvss_attackvector" in dff.columns and dff["cvss_attackvector"].notna().any():
         av_df = dff["cvss_attackvector"].value_counts().reset_index()
         av_df.columns = ["Attack Vector", "Count"]
@@ -576,10 +559,10 @@ def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
             text="cvss_attackvector / attack_vector data missing", x=0.5, y=0.5, showarrow=False
         )
 
-    # ---------- 6) Hazard / Survival Plot ----------
+    # Hazard Model
     fig_hazard = make_hazard_figure(dff)
 
-    # ---------- 7) P(KEV | Attack Vector) ----------
+    # P(KEV | Attack Vector)
     if "attack_vector" in dff.columns and dff["attack_vector"].notna().any():
         av_stats = (
             dff[["attack_vector", "is_kev"]]
@@ -611,7 +594,7 @@ def update_charts(year_range, severities, kev_mode, score_pair, hazard_mode):
             showarrow=False,
         )
 
-    # ---------- 8) Top cvss_vectorstring by P(KEV | vectorstring) ----------
+    # Top cvss_vectorstring by P(KEV | vectorstring)
     if VECTOR_COL in dff.columns:
         vs_counts = (
             dff[[VECTOR_COL, "is_kev"]]

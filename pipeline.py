@@ -1157,12 +1157,12 @@ def run_once(cli) -> None:
         if do_haz:
             run_ext(
                 "HAZARD",
-                "hazard_model_final.py",
+                "hazard_model.py",
                 ["--input", str(PATH_FEAT), "--output", str(PATH_HAZ_OUT)],
             )
 
         if do_dash:
-            run_ext("DASHBOARD", "dashboard_combined_final_wayne.py", [])
+            run_ext("DASHBOARD", "dashboard_combined_final.py", [])
     elif (do_model or do_feat or do_haz or do_dash):
         logging.warning("[ANALYSIS] Skipping MODEL/features/hazard/dashboard because merge produced 0 rows or failed.")
 

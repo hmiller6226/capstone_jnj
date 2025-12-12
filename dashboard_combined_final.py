@@ -5,7 +5,7 @@ import plotly.graph_objs as go
 import numpy as np
 
 #Config
-CSV_PATH = "/Users/kelvinguyen2/Documents/data/model/model_scores.csv"
+CSV_PATH = "data/model/model_scores.csv"
 RISK_SCORE_XGBOOST = "risk_score_xgb"          # XGB risk score
 RISK_SCORE_KDE = "risk_score_kde"
 HAZARD_RISK_COL = "hazard_risk_score"  # hazard-model risk
@@ -42,7 +42,7 @@ AV_MAP = {
 df = pd.read_csv(CSV_PATH, low_memory=False)
 
 try:
-    hazard_df = pd.read_csv("hazard_outputs-2.csv", low_memory=False)
+    hazard_df=pd.read_csv("data/hazard/hazard_outputs.csv")
 
     # rename risk_score so we don't overwrite KDE risk_score
     hazard_df = hazard_df.rename(columns={

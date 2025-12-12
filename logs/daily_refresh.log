@@ -1,0 +1,621 @@
+2025-12-11 20:07:40,260 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-11 20:07:40,283 [INFO] Added job "main.<locals>.<lambda>" to job store "default"
+2025-12-11 20:07:40,284 [INFO] Scheduler started
+2025-12-11 20:07:40,286 [INFO] scheduler: daily 06:00 (America/Los_Angeles) -> logs\daily_refresh.log
+2025-12-11 20:09:59,398 [INFO] Scheduler has been shut down
+2025-12-11 20:09:59,399 [INFO] stopped
+2025-12-11 20:10:13,138 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-11 20:10:13,142 [INFO] Added job "main.<locals>.<lambda>" to job store "default"
+2025-12-11 20:10:13,143 [INFO] Scheduler started
+2025-12-11 20:10:13,145 [INFO] scheduler: daily 06:00 (America/Los_Angeles) -> logs\daily_refresh.log
+2025-12-11 20:10:26,862 [INFO] Scheduler has been shut down
+2025-12-11 20:10:26,863 [INFO] stopped
+2025-12-11 20:15:13,738 [INFO] Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-12-11 20:15:13,743 [INFO] Added job "main.<locals>.<lambda>" to job store "default"
+2025-12-11 20:15:13,744 [INFO] Scheduler started
+2025-12-11 20:15:13,746 [INFO] scheduler: daily 06:00 (America/Los_Angeles) -> logs\daily_refresh.log
+2025-12-11 20:16:11,663 [INFO] Scheduler has been shut down
+2025-12-11 20:16:11,664 [INFO] stopped
+2025-12-11 20:16:27,332 [INFO] === refresh start ===
+2025-12-11 20:16:27,333 [INFO] [NVD] recent + modified
+2025-12-11 20:16:32,102 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:16:32,142 [INFO] [KEV] download
+2025-12-11 20:16:32,906 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:16:32,908 [INFO] [JVN] attempt 1/2
+2025-12-11 20:16:32,910 [INFO] [JVN] incremental 2025-12-05..2025-12-12 (years 2025..2025)
+2025-12-11 20:16:32,910 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:16:35,745 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:16:35,747 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:16:37,637 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:16:39,456 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:16:41,217 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:16:43,048 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:16:44,875 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:16:46,620 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:16:48,517 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:16:50,457 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:16:52,403 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:16:54,042 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:16:55,105 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:16:55,157 [INFO] [JVN] total 511
+2025-12-11 20:16:55,158 [INFO] [EUVD] 2025-12-05..2025-12-12
+2025-12-11 20:16:58,240 [INFO] [EUVD] 2025-12-05..2025-12-12 pages=10 first=100 total=1999
+2025-12-11 20:17:11,686 [INFO] [EUVD] total 1000
+2025-12-11 20:17:12,652 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:17:13,206 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:17:13,207 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:17:13,344 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:17:13,348 [INFO] === refresh end (partial success possible) ===
+2025-12-11 20:19:37,337 [INFO] === refresh start ===
+2025-12-11 20:19:37,337 [INFO] [NVD] recent + modified
+2025-12-11 20:19:42,511 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:19:42,551 [INFO] [KEV] download
+2025-12-11 20:19:43,328 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:19:43,331 [INFO] [JVN] attempt 1/2
+2025-12-11 20:19:43,332 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:19:43,333 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:19:45,569 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:19:45,572 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:19:47,511 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:19:49,330 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:19:51,174 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:19:52,977 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:19:55,327 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:19:57,834 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:19:59,609 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:20:01,437 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:20:03,208 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:20:04,844 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:20:05,885 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:20:05,929 [INFO] [JVN] total 511
+2025-12-11 20:20:05,930 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:20:08,418 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:20:08,497 [INFO] [EUVD] total 1000
+2025-12-11 20:20:08,830 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:20:09,251 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:20:09,253 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:20:09,394 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:20:09,397 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:20:14,490 [ERROR] [model] failed: Command '['C:\\Python313\\python.exe', 'models.py', '--input', 'data\\clean\\combined_master.csv', '--output', 'data\\model\\model_scores.csv']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\makwa\Desktop\capstone_jnj\pipeline.py", line 1070, in run_ext
+    subprocess.run(cmd, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'models.py', '--input', 'data\\clean\\combined_master.csv', '--output', 'data\\model\\model_scores.csv']' returned non-zero exit status 1.
+2025-12-11 20:20:14,523 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:20:18,196 [ERROR] [HAZARD] script not found: hazard_model_final.py (skipping)
+2025-12-11 20:20:18,197 [ERROR] [DASHBOARD] script not found: dashboard_combined_final_wayne.py (skipping)
+2025-12-11 20:20:18,198 [INFO] === refresh end (partial success possible) ===
+2025-12-11 20:21:04,432 [INFO] === refresh start ===
+2025-12-11 20:21:04,432 [INFO] [NVD] recent + modified
+2025-12-11 20:21:09,181 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:21:09,220 [INFO] [KEV] download
+2025-12-11 20:21:09,933 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:21:09,936 [INFO] [JVN] attempt 1/2
+2025-12-11 20:21:09,936 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:21:09,937 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:21:12,211 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:21:12,213 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:21:14,108 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:21:16,862 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:21:19,412 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:21:21,893 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:21:23,730 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:21:26,597 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:21:29,423 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:21:31,390 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:21:33,199 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:21:34,813 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:21:35,836 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:21:35,879 [INFO] [JVN] total 511
+2025-12-11 20:21:35,880 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:21:38,098 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:21:38,165 [INFO] [EUVD] total 1000
+2025-12-11 20:21:38,508 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:21:38,947 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:21:38,948 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:21:39,079 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:21:39,083 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:21:49,423 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:21:53,075 [ERROR] [HAZARD] script not found: hazard_model_final.py (skipping)
+2025-12-11 20:21:53,076 [ERROR] [DASHBOARD] script not found: dashboard_combined_final_wayne.py (skipping)
+2025-12-11 20:21:53,077 [INFO] === refresh end (partial success possible) ===
+2025-12-11 20:22:17,324 [INFO] === refresh start ===
+2025-12-11 20:22:17,325 [INFO] [NVD] recent + modified
+2025-12-11 20:22:21,792 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:22:21,837 [INFO] [KEV] download
+2025-12-11 20:22:22,525 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:22:22,528 [INFO] [JVN] attempt 1/2
+2025-12-11 20:22:22,529 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:22:22,529 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:22:25,017 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:22:25,020 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:22:26,874 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:22:28,671 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:22:30,638 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:22:32,601 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:22:34,531 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:22:36,474 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:22:38,318 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:22:40,091 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:22:41,871 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:22:43,508 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:22:44,550 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:22:44,593 [INFO] [JVN] total 511
+2025-12-11 20:22:44,594 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:22:46,976 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:22:47,071 [INFO] [EUVD] total 1000
+2025-12-11 20:22:47,444 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:22:47,932 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:22:47,953 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:22:48,082 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:22:48,084 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:22:58,530 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:23:02,584 [ERROR] [HAZARD] script not found: hazard_model_final.py (skipping)
+2025-12-11 20:23:02,584 [ERROR] [DASHBOARD] script not found: dashboard_combined_final_wayne.py (skipping)
+2025-12-11 20:23:02,586 [INFO] === refresh end (partial success possible) ===
+2025-12-11 20:23:10,132 [INFO] === refresh start ===
+2025-12-11 20:23:10,132 [INFO] [NVD] recent + modified
+2025-12-11 20:23:16,335 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:23:16,380 [INFO] [KEV] download
+2025-12-11 20:23:17,108 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:23:17,110 [INFO] [JVN] attempt 1/2
+2025-12-11 20:23:17,111 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:23:17,111 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:23:19,684 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:23:19,688 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:23:21,543 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:23:23,357 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:23:25,169 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:23:26,969 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:23:28,798 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:23:31,874 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:23:33,813 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:23:35,623 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:23:37,457 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:23:39,108 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:23:40,160 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:23:40,204 [INFO] [JVN] total 511
+2025-12-11 20:23:40,205 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:23:42,621 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:23:42,708 [INFO] [EUVD] total 1000
+2025-12-11 20:23:43,071 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:23:43,515 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:23:43,516 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:23:43,700 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:23:43,703 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:23:54,379 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:23:58,622 [ERROR] [HAZARD] script not found: hazard_model_final.py (skipping)
+2025-12-11 20:23:58,622 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 20:24:02,451 [ERROR] [DASHBOARD] failed: Command '['C:\\Python313\\python.exe', 'dashboard_combined_final.py']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\makwa\Desktop\capstone_jnj\pipeline.py", line 1070, in run_ext
+    subprocess.run(cmd, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'dashboard_combined_final.py']' returned non-zero exit status 1.
+2025-12-11 20:24:02,456 [INFO] === refresh end (partial success possible) ===
+2025-12-11 20:25:25,100 [INFO] === refresh start ===
+2025-12-11 20:25:25,101 [INFO] [NVD] recent + modified
+2025-12-11 20:25:30,139 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:25:30,189 [INFO] [KEV] download
+2025-12-11 20:25:30,893 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:25:30,896 [INFO] [JVN] attempt 1/2
+2025-12-11 20:25:30,897 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:25:30,897 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:25:33,801 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:25:33,803 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:25:35,630 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:25:37,448 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:25:39,912 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:25:42,265 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:25:44,174 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:25:46,138 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:25:48,090 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:25:49,879 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:25:51,674 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:25:53,369 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:25:54,397 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:25:54,437 [INFO] [JVN] total 511
+2025-12-11 20:25:54,446 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:25:56,870 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:25:56,941 [INFO] [EUVD] total 1000
+2025-12-11 20:25:57,260 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:25:57,679 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:25:57,680 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:25:57,818 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:25:57,821 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:26:07,954 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:26:12,263 [ERROR] [HAZARD] script not found: hazard_model_final.py (skipping)
+2025-12-11 20:26:12,263 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 20:26:16,421 [ERROR] [DASHBOARD] failed: Command '['C:\\Python313\\python.exe', 'dashboard_combined_final.py']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\makwa\Desktop\capstone_jnj\pipeline.py", line 1070, in run_ext
+    subprocess.run(cmd, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'dashboard_combined_final.py']' returned non-zero exit status 1.
+2025-12-11 20:26:16,426 [INFO] === refresh end (partial success possible) ===
+2025-12-11 20:29:35,107 [INFO] === refresh start ===
+2025-12-11 20:29:35,108 [INFO] [NVD] recent + modified
+2025-12-11 20:30:00,317 [INFO] === refresh start ===
+2025-12-11 20:30:00,317 [INFO] [NVD] recent + modified
+2025-12-11 20:30:05,021 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:30:05,070 [INFO] [KEV] download
+2025-12-11 20:30:05,748 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:30:05,751 [INFO] [JVN] attempt 1/2
+2025-12-11 20:30:05,752 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:30:05,752 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:30:08,376 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:30:08,379 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:30:10,733 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:30:12,704 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:30:15,187 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:30:17,005 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:30:18,877 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:30:20,866 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:30:22,677 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:30:24,496 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:30:26,279 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:30:27,914 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:30:28,963 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:30:29,017 [INFO] [JVN] total 511
+2025-12-11 20:30:29,017 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:30:31,238 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:30:31,317 [INFO] [EUVD] total 1000
+2025-12-11 20:30:31,653 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:30:32,079 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:30:32,081 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:30:32,230 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:30:32,234 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:30:42,792 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:30:46,833 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 20:30:49,859 [ERROR] [HAZARD] failed: Command '['C:\\Python313\\python.exe', 'hazard_model.py', '--input', 'data\\clean\\combined_with_features.csv', '--output', 'data\\hazard\\hazard_outputs.csv']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\makwa\Desktop\capstone_jnj\pipeline.py", line 1070, in run_ext
+    subprocess.run(cmd, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'hazard_model.py', '--input', 'data\\clean\\combined_with_features.csv', '--output', 'data\\hazard\\hazard_outputs.csv']' returned non-zero exit status 1.
+2025-12-11 20:30:49,863 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 20:30:53,375 [ERROR] [DASHBOARD] failed: Command '['C:\\Python313\\python.exe', 'dashboard_combined_final.py']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\makwa\Desktop\capstone_jnj\pipeline.py", line 1070, in run_ext
+    subprocess.run(cmd, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'dashboard_combined_final.py']' returned non-zero exit status 1.
+2025-12-11 20:30:53,379 [INFO] === refresh end (partial success possible) ===
+2025-12-11 20:31:18,519 [INFO] === refresh start ===
+2025-12-11 20:31:18,520 [INFO] [NVD] recent + modified
+2025-12-11 20:31:23,660 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:31:23,707 [INFO] [KEV] download
+2025-12-11 20:31:24,534 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:31:24,538 [INFO] [JVN] attempt 1/2
+2025-12-11 20:31:24,539 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:31:24,539 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:31:27,145 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:31:27,148 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:31:29,004 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:31:31,484 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:31:34,170 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:31:37,001 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:31:39,522 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:31:41,507 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:31:44,003 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:31:46,591 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:31:48,728 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:31:50,466 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:31:51,589 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:31:51,633 [INFO] [JVN] total 511
+2025-12-11 20:31:51,634 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:31:54,253 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:31:54,332 [INFO] [EUVD] total 1000
+2025-12-11 20:31:54,672 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:31:55,115 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:31:55,116 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:31:55,253 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:31:55,256 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:32:05,986 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:32:09,981 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 20:32:13,017 [ERROR] [HAZARD] failed: Command '['C:\\Python313\\python.exe', 'hazard_model.py', '--input', 'data\\clean\\combined_with_features.csv', '--output', 'data\\hazard\\hazard_outputs.csv']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\makwa\Desktop\capstone_jnj\pipeline.py", line 1070, in run_ext
+    subprocess.run(cmd, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'hazard_model.py', '--input', 'data\\clean\\combined_with_features.csv', '--output', 'data\\hazard\\hazard_outputs.csv']' returned non-zero exit status 1.
+2025-12-11 20:32:13,029 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 20:41:17,068 [INFO] === refresh start ===
+2025-12-11 20:41:17,069 [INFO] [NVD] recent + modified
+2025-12-11 20:41:21,948 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:41:21,996 [INFO] [KEV] download
+2025-12-11 20:41:22,714 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:41:22,716 [INFO] [JVN] attempt 1/2
+2025-12-11 20:41:22,717 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:41:22,717 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:41:25,119 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:41:25,121 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:41:26,919 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:41:28,749 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:41:31,159 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:41:32,998 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:41:34,853 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:41:36,701 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:41:39,080 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:41:40,915 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:41:43,542 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:41:45,202 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:41:46,340 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:41:46,391 [INFO] [JVN] total 511
+2025-12-11 20:41:46,392 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:41:49,007 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:41:49,080 [INFO] [EUVD] total 1000
+2025-12-11 20:41:49,407 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:41:49,832 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:41:49,833 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:41:49,967 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:41:49,970 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:41:59,838 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:42:03,536 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 20:42:06,476 [ERROR] [HAZARD] failed: Command '['C:\\Python313\\python.exe', 'hazard_model.py', '--input', 'data\\clean\\combined_with_features.csv', '--output', 'data\\hazard\\hazard_outputs.csv']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\makwa\Desktop\capstone_jnj\pipeline.py", line 1070, in run_ext
+    subprocess.run(cmd, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'hazard_model.py', '--input', 'data\\clean\\combined_with_features.csv', '--output', 'data\\hazard\\hazard_outputs.csv']' returned non-zero exit status 1.
+2025-12-11 20:42:06,480 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 20:45:14,285 [INFO] === refresh start ===
+2025-12-11 20:45:14,285 [INFO] [NVD] recent + modified
+2025-12-11 20:45:19,448 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:45:19,491 [INFO] [KEV] download
+2025-12-11 20:45:20,183 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:45:20,185 [INFO] [JVN] attempt 1/2
+2025-12-11 20:45:20,186 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:45:20,186 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:45:23,339 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:45:23,342 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:45:25,293 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:45:27,140 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:45:29,072 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:45:32,143 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:45:34,089 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:45:35,896 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:45:37,720 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:45:40,307 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:45:42,163 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:45:43,766 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:45:44,795 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:45:44,844 [INFO] [JVN] total 511
+2025-12-11 20:45:44,845 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:45:47,573 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:45:47,647 [INFO] [EUVD] total 1000
+2025-12-11 20:45:47,984 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:45:48,437 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:45:48,438 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:45:48,597 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:45:48,600 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:45:58,593 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:46:02,273 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 20:46:05,502 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 20:47:24,770 [INFO] === refresh start ===
+2025-12-11 20:47:24,771 [INFO] [NVD] recent + modified
+2025-12-11 20:47:29,567 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:47:29,610 [INFO] [KEV] download
+2025-12-11 20:47:30,313 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:47:30,316 [INFO] [JVN] attempt 1/2
+2025-12-11 20:47:30,316 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:47:30,317 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:47:33,999 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:47:34,001 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:47:35,824 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:47:37,791 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:47:39,647 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:47:45,159 [WARNING] Retrying (Retry(total=5, connect=6, read=5, redirect=None, status=None)) after connection broken by 'RemoteDisconnected('Remote end closed connection without response')': /myjvn?method=getVulnOverviewList&feed=hnd&lang=ja&rangeDatePublic=n&datePublicStartY=2025&datePublicStartM=1&datePublicStartD=1&datePublicEndY=2025&datePublicEndM=12&datePublicEndD=31&maxCountItem=50&startItem=201
+2025-12-11 20:47:48,248 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:47:51,038 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:47:53,153 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:47:56,120 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:47:58,510 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:48:01,160 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:48:02,832 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:48:03,941 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:48:04,001 [INFO] [JVN] total 511
+2025-12-11 20:48:04,002 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:48:06,520 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:48:06,600 [INFO] [EUVD] total 1000
+2025-12-11 20:48:06,933 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:48:07,383 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:48:07,383 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:48:07,555 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:48:07,558 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:48:18,497 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:48:22,212 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 20:48:25,230 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 20:49:52,264 [INFO] === refresh start ===
+2025-12-11 20:49:52,265 [INFO] [NVD] recent + modified
+2025-12-11 20:49:57,102 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:49:57,146 [INFO] [KEV] download
+2025-12-11 20:49:57,830 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:49:57,833 [INFO] [JVN] attempt 1/2
+2025-12-11 20:49:57,834 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:49:57,834 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:50:00,961 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:50:00,964 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:50:02,801 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:50:04,603 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:50:07,510 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:50:09,487 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:50:11,309 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:50:13,111 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:50:15,080 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:50:17,041 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:50:20,000 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:50:21,648 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:50:22,672 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:50:22,720 [INFO] [JVN] total 511
+2025-12-11 20:50:22,721 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:50:24,944 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:50:25,014 [INFO] [EUVD] total 1000
+2025-12-11 20:50:25,347 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:50:25,785 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:50:25,787 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:50:25,920 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:50:25,922 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:50:36,555 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:50:40,236 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 20:50:43,206 [ERROR] [HAZARD] failed: Command '['C:\\Python313\\python.exe', 'hazard_model.py', '--input', 'data\\clean\\combined_with_features.csv', '--output', 'data\\hazard\\hazard_outputs.csv']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\makwa\Desktop\capstone_jnj\pipeline.py", line 1070, in run_ext
+    subprocess.run(cmd, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 579, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'hazard_model.py', '--input', 'data\\clean\\combined_with_features.csv', '--output', 'data\\hazard\\hazard_outputs.csv']' returned non-zero exit status 1.
+2025-12-11 20:50:43,210 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 20:53:57,211 [INFO] === refresh start ===
+2025-12-11 20:53:57,212 [INFO] [NVD] recent + modified
+2025-12-11 20:54:02,643 [INFO] [NVD] master rows: 3,231
+2025-12-11 20:54:02,688 [INFO] [KEV] download
+2025-12-11 20:54:03,627 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 20:54:03,630 [INFO] [JVN] attempt 1/2
+2025-12-11 20:54:03,631 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 20:54:03,632 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 20:54:06,135 [INFO] [JVN] 2025 retCd=0 totalRes=511 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 20:54:06,137 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 20:54:07,934 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 20:54:10,404 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 20:54:12,180 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 20:54:13,987 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 20:54:16,322 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 20:54:18,169 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 20:54:19,962 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 20:54:21,783 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 20:54:23,597 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 20:54:25,237 [INFO] [JVN] 2025: received 11 items (startItem=501, page_size=50)
+2025-12-11 20:54:26,271 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 20:54:26,316 [INFO] [JVN] total 511
+2025-12-11 20:54:26,317 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 20:54:28,830 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 20:54:28,914 [INFO] [EUVD] total 1000
+2025-12-11 20:54:29,275 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=520
+2025-12-11 20:54:29,712 [INFO] [merge] wrote rows=4,782
+2025-12-11 20:54:29,713 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 20:54:29,860 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 20:54:29,863 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 20:54:39,808 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 20:54:43,448 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 20:54:46,579 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 21:01:51,725 [INFO] === refresh start ===
+2025-12-11 21:01:51,725 [INFO] [NVD] recent + modified
+2025-12-11 21:01:56,995 [INFO] [NVD] master rows: 3,231
+2025-12-11 21:01:57,044 [INFO] [KEV] download
+2025-12-11 21:01:57,912 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 21:01:57,915 [INFO] [JVN] attempt 1/2
+2025-12-11 21:01:57,916 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 21:01:57,916 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 21:02:00,780 [INFO] [JVN] 2025 retCd=0 totalRes=513 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 21:02:00,783 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 21:02:03,140 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 21:02:05,102 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 21:02:06,950 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 21:02:08,733 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 21:02:10,540 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 21:02:12,373 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 21:02:14,792 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 21:02:17,155 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 21:02:19,029 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 21:02:20,744 [INFO] [JVN] 2025: received 13 items (startItem=501, page_size=50)
+2025-12-11 21:02:21,787 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 21:02:21,842 [INFO] [JVN] total 513
+2025-12-11 21:02:21,843 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 21:02:24,231 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 21:02:24,317 [INFO] [EUVD] total 1000
+2025-12-11 21:02:24,690 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=522
+2025-12-11 21:02:25,161 [INFO] [merge] wrote rows=4,782
+2025-12-11 21:02:25,162 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 21:02:25,309 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 21:02:25,312 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 21:02:54,102 [INFO] === refresh start ===
+2025-12-11 21:02:54,103 [INFO] [NVD] recent + modified
+2025-12-11 21:02:58,847 [INFO] [NVD] master rows: 3,231
+2025-12-11 21:02:58,891 [INFO] [KEV] download
+2025-12-11 21:03:00,752 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 21:03:00,754 [INFO] [JVN] attempt 1/2
+2025-12-11 21:03:00,755 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 21:03:00,755 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 21:03:04,594 [INFO] [JVN] 2025 retCd=0 totalRes=513 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 21:03:04,597 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 21:03:10,279 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 21:03:13,388 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 21:03:15,670 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 21:03:17,802 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 21:03:19,876 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 21:03:21,816 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 21:03:23,742 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 21:03:25,657 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 21:03:27,813 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 21:03:29,463 [INFO] [JVN] 2025: received 13 items (startItem=501, page_size=50)
+2025-12-11 21:03:30,480 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 21:03:30,543 [INFO] [JVN] total 513
+2025-12-11 21:03:30,544 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 21:03:32,809 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 21:03:32,900 [INFO] [EUVD] total 1000
+2025-12-11 21:03:33,248 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=522
+2025-12-11 21:03:33,706 [INFO] [merge] wrote rows=4,782
+2025-12-11 21:03:33,707 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 21:03:33,852 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 21:03:33,855 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 21:03:44,507 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 21:03:48,312 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 21:03:51,762 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py
+2025-12-11 21:04:54,153 [INFO] === refresh start ===
+2025-12-11 21:04:54,153 [INFO] [NVD] recent + modified
+2025-12-11 21:04:59,345 [INFO] [NVD] master rows: 3,231
+2025-12-11 21:04:59,394 [INFO] [KEV] download
+2025-12-11 21:05:00,112 [INFO] [KEV] saved data\kev\known_exploited_vulnerabilities.csv
+2025-12-11 21:05:00,114 [INFO] [JVN] attempt 1/2
+2025-12-11 21:05:00,115 [INFO] [JVN] incremental 2025-12-12..2025-12-12 (years 2025..2025)
+2025-12-11 21:05:00,115 [INFO] [JVN] Fetching year 2025 (HND, lang=ja)
+2025-12-11 21:05:02,936 [INFO] [JVN] 2025 retCd=0 totalRes=513 totalResRet=50 retMax=50 errCd= errMsg=
+2025-12-11 21:05:02,940 [INFO] [JVN] 2025: received 50 items (startItem=1, page_size=50)
+2025-12-11 21:05:04,752 [INFO] [JVN] 2025: received 50 items (startItem=51, page_size=50)
+2025-12-11 21:05:06,607 [INFO] [JVN] 2025: received 50 items (startItem=101, page_size=50)
+2025-12-11 21:05:09,059 [INFO] [JVN] 2025: received 50 items (startItem=151, page_size=50)
+2025-12-11 21:05:11,439 [INFO] [JVN] 2025: received 50 items (startItem=201, page_size=50)
+2025-12-11 21:05:13,286 [INFO] [JVN] 2025: received 50 items (startItem=251, page_size=50)
+2025-12-11 21:05:15,153 [INFO] [JVN] 2025: received 50 items (startItem=301, page_size=50)
+2025-12-11 21:05:17,691 [INFO] [JVN] 2025: received 50 items (startItem=351, page_size=50)
+2025-12-11 21:05:19,551 [INFO] [JVN] 2025: received 50 items (startItem=401, page_size=50)
+2025-12-11 21:05:21,960 [INFO] [JVN] 2025: received 50 items (startItem=451, page_size=50)
+2025-12-11 21:05:23,652 [INFO] [JVN] 2025: received 13 items (startItem=501, page_size=50)
+2025-12-11 21:05:24,748 [WARNING] [JVN] 2025 startItem=551 err=startItem\u304c\u691c\u7d22\u7d50\u679c\u4ef6\u6570\u3092\u8d85\u3048\u3066\u3044\u307e\u3059\u3002
+2025-12-11 21:05:24,798 [INFO] [JVN] total 513
+2025-12-11 21:05:24,799 [INFO] [EUVD] 2025-12-12..2025-12-12
+2025-12-11 21:05:27,355 [INFO] [EUVD] 2025-12-12..2025-12-12 pages=1 first=100 total=112
+2025-12-11 21:05:27,427 [INFO] [EUVD] total 1000
+2025-12-11 21:05:27,765 [INFO] [merge] nvd=3231 kev=1473 euvd=819 jvn=522
+2025-12-11 21:05:28,199 [INFO] [merge] wrote rows=4,782
+2025-12-11 21:05:28,200 [INFO] [MERGE] combined rows: 4,782
+2025-12-11 21:05:28,338 [INFO] [MERGE] wrote data\clean\combined_master.csv
+2025-12-11 21:05:28,341 [INFO] [model] running: C:\Python313\python.exe models.py --input data\clean\combined_master.csv --output data\model\model_scores.csv
+2025-12-11 21:05:38,641 [INFO] [FEATURES] running: C:\Python313\python.exe build_features.py --input data\clean\combined_master.csv --output data\clean\combined_with_features.csv
+2025-12-11 21:05:43,456 [INFO] [HAZARD] running: C:\Python313\python.exe hazard_model.py --input data\clean\combined_with_features.csv --output data\hazard\hazard_outputs.csv
+2025-12-11 21:05:48,072 [INFO] [DASHBOARD] running: C:\Python313\python.exe dashboard_combined_final.py

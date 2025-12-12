@@ -675,3 +675,4 @@ def update_top_risk_table(search_value, year_range, severities, kev_mode, hazard
 
 if __name__ == "__main__":
     app.run(debug=True, port=8050)
+

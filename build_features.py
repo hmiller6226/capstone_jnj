@@ -303,4 +303,4 @@ if __name__ == "__main__":
     df_clean = clean_cve_df(df)
     df_features = build_feature_set(df_clean)
     df_features.to_csv(args.output, index=False)
-    print(f"✅ Output written to {args.output} with shape: {df_features.shape}")
+    print(f"Output written to {args.output} with shape: {df_features.shape}")
